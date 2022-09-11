@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   web_socket_channel:
   http:
+  bubble: 
 
 dev_dependencies:
   flutter_test:
