@@ -38,6 +38,7 @@ dependencies:
   web_socket_channel:
   http:
   bubble: 
+  flutter_spinkit:
 
 dev_dependencies:
   flutter_test:

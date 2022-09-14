@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:bubble/bubble.dart';
-import 'package:bubble/issue_clipper.dart';
-
-List<Bubble> _list = [];
+import 'package:project_note/model/Message.dart';
+import 'package:project_note/constants/constant.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -14,7 +13,30 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final controller = ScrollController();
+
+  Future<void> LoadMore() async {
+    await getMessages();
+    setState(() {});
+  }
+
   @override
+  void initState() {
+    super.initState();
+    controller.addListener(() {
+      
+      if (controller.position.maxScrollExtent == controller.offset) {
+        LoadMore();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   Widget bottomSheet() {
     return Container(
       height: 278,
@@ -109,25 +131,31 @@ class _HomeState extends State<Home> {
   );
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                _list.isNotEmpty
-                    ? ListView.builder(
-                        shrinkWrap: true,
-                        physics: ClampingScrollPhysics(),
-                        itemCount: _list.length,
-                        itemBuilder: (context, i) {
-                          return _list[i];
-                        })
-                    : Container(),
-              ],
-            ),
+      body: CustomScrollView(controller: controller, reverse: true, slivers: [
+        SliverToBoxAdapter(
+          child: Container(
+            child: (messageslist.isEmpty)
+                ? Center(child: Text('Start Typing.... '))
+                : ListView.builder(
+                    reverse: true,
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    itemCount: messageslist.length + 1,
+                    itemBuilder: (context, i) {
+                      if (i < messageslist.length) {
+                        return (Bubble(
+                            style: styleMe,
+                            child: Text(messageslist[i].message.toString())));
+                      } else {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                    }),
           ),
-        ],
-      ),
+        ),
+      ]),
       bottomNavigationBar: Container(
         //color: Colors.white,
         child: Row(
@@ -170,15 +198,7 @@ class _HomeState extends State<Home> {
               ),
             ),
             IconButton(
-                // padding: EdgeInsets.all(0.0),
-
                 onPressed: () async {
-                  setState(() {
-                    _list.add(Bubble(
-                      style: styleMe,
-                      child: Text(_messagecontroller.value.text),
-                    ));
-                  });
                   try {
                     var response = await http.post(
                         Uri.parse('http://localhost:3000/home'),
@@ -192,8 +212,22 @@ class _HomeState extends State<Home> {
                     if (response.statusCode == 200) {
                       Map<dynamic, dynamic> jsonDecode =
                           json.decode(response.body);
-                      print(jsonDecode);
-                    } else {}
+                      setState(() {
+                        messageslist.insert(
+                            0,
+                            Message(
+                                userName: jsonDecode['result']['username'],
+                                date: jsonDecode['result']['createdAt'],
+                                mediaType:
+                                    jsonDecode['result']['path'] ?? 'text',
+                                message: jsonDecode['result']['text'],
+                                path: jsonDecode['result']['path']));
+                      });
+
+                      //print(jsonDecode);
+                    } else {
+                      throw Exception('cannot store message');
+                    }
                   } catch (e) {
                     print(e.toString());
                   }
