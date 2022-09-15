@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:project_note/model/Message.dart';
-import 'package:project_note/constants/constant.dart';
+import 'package:project_note/globals/globals.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -21,7 +21,7 @@ class _LoadingStateState extends State<LoadingState> {
       for (int i = 0; i < data.length; i++) {
         messageslist.add(Message(
             userName: data[i]['username'],
-            date: data[i]['createdAt'],
+            datetime: data[i]['createdAt'],
             mediaType: data[i]['path'] ?? 'text',
             message: data[i]['text'],
             path: data[i]['path']));
@@ -37,7 +37,11 @@ class _LoadingStateState extends State<LoadingState> {
   void WaitForData() async {
     await getMessages();
     if (messageslist.isNotEmpty) {
+      pageno++;
       Navigator.pushReplacementNamed(context, '/home');
+    }
+    else{
+       Navigator.pushReplacementNamed(context, '/err');
     }
   }
 
@@ -49,7 +53,7 @@ class _LoadingStateState extends State<LoadingState> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         backgroundColor: Colors.black,
         body: Center(
             child: SpinKitDoubleBounce(

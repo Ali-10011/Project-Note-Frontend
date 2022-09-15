@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:bubble/bubble.dart';
 import 'package:project_note/model/Message.dart';
-import 'package:project_note/constants/constant.dart';
+import 'package:project_note/globals/globals.dart';
+import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -14,7 +15,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final controller = ScrollController();
-
+  late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
     await getMessages();
     setState(() {});
@@ -24,9 +25,10 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     controller.addListener(() {
-      
       if (controller.position.maxScrollExtent == controller.offset) {
-        LoadMore();
+        if (!(IsLastPage)) {
+          LoadMore();
+        }
       }
     });
   }
@@ -119,16 +121,37 @@ class _HomeState extends State<Home> {
     );
   }
 
-  late TextEditingController _messagecontroller = TextEditingController();
-  static const styleMe = BubbleStyle(
-    nip: BubbleNip.rightCenter,
-    color: Color.fromARGB(255, 225, 255, 199),
-    borderColor: Colors.blue,
-    borderWidth: 1,
-    elevation: 4,
-    margin: BubbleEdges.only(top: 8, left: 50),
-    alignment: Alignment.topRight,
-  );
+  Future<void> sendmessage() async {
+    try {
+      var response = await http.post(Uri.parse('http://localhost:3000/home'),
+          headers: {"Content-Type": "application/x-www-form-urlencoded"},
+          body: {'message': _messagecontroller.value.text.toString()});
+
+      if (response.statusCode == 200) {
+        Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+        setState(() {
+          messageslist.insert(
+              0,
+              Message(
+                  userName: jsonDecode['result']['username'],
+                  datetime: jsonDecode['result']['createdAt'],
+                  mediaType: jsonDecode['result']['path'] ?? 'text',
+                  message: jsonDecode['result']['text'],
+                  path: jsonDecode['result']['path']));
+          newmessages++;
+        });
+
+        //print(jsonDecode);
+      } else {
+        //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
+        throw Exception('cannot store message');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+    _messagecontroller.clear();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(controller: controller, reverse: true, slivers: [
@@ -143,10 +166,37 @@ class _HomeState extends State<Home> {
                     itemCount: messageslist.length + 1,
                     itemBuilder: (context, i) {
                       if (i < messageslist.length) {
+                        final format = DateFormat("h:mma");
+                        final clockString = format
+                            .format(DateTime.parse(messageslist[i].datetime));
+                        // DateTime FirstdateTime = DateTime.parse(messageslist[i].datetime); //current message
+                        //   DateTime SeconddateTime = DateTime.parse(messageslist[i].datetime);
+                        // final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                        // String thismessage = formatter.format(FirstdateTime);
+                        // String previousmessage = formatter.format(SeconddateTime);
+                        // if(FirstdateTime.isBefore(SeconddateTime))
+
                         return (Bubble(
                             style: styleMe,
-                            child: Text(messageslist[i].message.toString())));
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(messageslist[i].message.toString()),
+                                Text(
+                                  clockString,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                              ],
+                            )));
                       } else {
+                        if (IsLastPage) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 32),
+                            child: Center(child: Text("All messages Loaded !")),
+                          );
+                        }
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: Center(child: CircularProgressIndicator()),
@@ -198,41 +248,7 @@ class _HomeState extends State<Home> {
               ),
             ),
             IconButton(
-                onPressed: () async {
-                  try {
-                    var response = await http.post(
-                        Uri.parse('http://localhost:3000/home'),
-                        headers: {
-                          "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: {
-                          'message': _messagecontroller.value.text.toString()
-                        });
-
-                    if (response.statusCode == 200) {
-                      Map<dynamic, dynamic> jsonDecode =
-                          json.decode(response.body);
-                      setState(() {
-                        messageslist.insert(
-                            0,
-                            Message(
-                                userName: jsonDecode['result']['username'],
-                                date: jsonDecode['result']['createdAt'],
-                                mediaType:
-                                    jsonDecode['result']['path'] ?? 'text',
-                                message: jsonDecode['result']['text'],
-                                path: jsonDecode['result']['path']));
-                      });
-
-                      //print(jsonDecode);
-                    } else {
-                      throw Exception('cannot store message');
-                    }
-                  } catch (e) {
-                    print(e.toString());
-                  }
-                  _messagecontroller.clear();
-                },
+                onPressed: sendmessage,
                 icon: Icon(
                   Icons.send,
                   color: Colors.blueAccent,
