@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "project_note",
+            "cwd": "project_note",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "project_note (profile mode)",
+            "cwd": "project_note",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "project_note (release mode)",
+            "cwd": "project_note",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "Flutter",
+            "program": "lib/main.dart",
+            "cwd": "project_note",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}
