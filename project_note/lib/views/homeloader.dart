@@ -26,7 +26,7 @@ class _LoadingStateState extends State<LoadingState> {
         messageslist.add(Message(
             userName: data[i]['username'],
             datetime: data[i]['createdAt'],
-            mediaType: data[i]['path'] ?? 'text',
+            mediaType: data[i]['mediatype'],
             message: data[i]['text'],
             path: data[i]['path']));
       }
@@ -34,86 +34,85 @@ class _LoadingStateState extends State<LoadingState> {
       //   print('${messageslist[i].message}  ${messageslist[i].date}');
       // }
     } else {
-      throw Exception("Failed to load products");
+      throw Exception("Failed to load messages");
     }
   }
 
   void WaitForData() async {
     await getMessages();
-    if (messageslist.isNotEmpty) {
-      pageno++;
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      Navigator.pushReplacementNamed(context, '/err');
-    }
+    pageno++;
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
   void initState() {
+    WaitForData();
     super.initState();
   }
 
   Widget build(BuildContext context) {
     Storage storage = Storage();
     return Scaffold(
-        body: Container(
-      child: Column(
-        children: [
-          ElevatedButton(
-              onPressed: () async {
-                final results = await FilePicker.platform.pickFiles(
-                    allowMultiple: false,
-                    type: FileType.custom,
-                    allowedExtensions: ['png', 'jpg']);
-                if (results == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('No File Was Selected.'),
-                  ));
-                  return null;
-                }
-                final path = results.files.single.path;
-                final fileName = results.files.single.name;
+      body: CircularProgressIndicator(),
+      //     body: Container(
+      //   child: Column(
+      //     children: [
+      //       ElevatedButton(
+      //           onPressed: () async {
+      //             final results = await FilePicker.platform.pickFiles(
+      //                 allowMultiple: false,
+      //                 type: FileType.custom,
+      //                 allowedExtensions: ['png', 'jpg']);
+      //             if (results == null) {
+      //               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      //                 content: Text('No File Was Selected.'),
+      //               ));
+      //               return null;
+      //             }
+      //             final path = results.files.single.path;
+      //             final fileName = results.files.single.name;
 
-                storage
-                    .uploadfile(path!, fileName)
-                    .then((value) => print('File has been uploaded'));
-              },
-              child: Text('Upload File')),
-          FutureBuilder(
-              future: storage.downloadURL('test.png'),
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData) {
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PhotoHero(
-                              photo: snapshot.data!,
-                            ),
-                          ));
-                    },
-                    child: Bubble(
-                        style: styleMe,
-                        child: Container(
-                            color: Colors.white,
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            height: MediaQuery.of(context).size.height * 0.45,
-                            child: Image.network(snapshot.data!,
-                                fit: BoxFit.cover))),
-                  );
-                } else if (snapshot.connectionState ==
-                        ConnectionState.waiting ||
-                    !snapshot.hasData) {
-                  return CircularProgressIndicator();
-                } else {
-                  return CircularProgressIndicator();
-                }
-                ;
-              }),
-        ],
-      ),
-    ));
+      //             storage
+      //                 .uploadfile(path!, fileName)
+      //                 .then((value) => print('File has been uploaded'));
+      //           },
+      //           child: Text('Upload File')),
+      //       FutureBuilder(
+      //           future: storage.downloadURL('test.png'),
+      //           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+      //             if (snapshot.connectionState == ConnectionState.done &&
+      //                 snapshot.hasData) {
+      //               return InkWell(
+      //                 onTap: () {
+      //                   Navigator.push(
+      //                       context,
+      //                       MaterialPageRoute(
+      //                         builder: (context) => PhotoHero(
+      //                           photo: snapshot.data!,
+      //                         ),
+      //                       ));
+      //                 },
+      //                 child: Bubble(
+      //                     style: styleMe,
+      //                     child: Container(
+      //                         color: Colors.white,
+      //                         width: MediaQuery.of(context).size.width * 0.6,
+      //                         height: MediaQuery.of(context).size.height * 0.45,
+      //                         child: Image.network(snapshot.data!,
+      //                             fit: BoxFit.cover))),
+      //               );
+      //             } else if (snapshot.connectionState ==
+      //                     ConnectionState.waiting ||
+      //                 !snapshot.hasData) {
+      //               return CircularProgressIndicator();
+      //             } else {
+      //               return CircularProgressIndicator();
+      //             }
+      //             ;
+      //           }),
+      //     ],
+      //   ),
+      // ),
+    );
   }
 }

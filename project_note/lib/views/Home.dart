@@ -5,6 +5,11 @@ import 'package:bubble/bubble.dart';
 import 'package:project_note/model/Message.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:project_note/model/firebaseStorage.dart';
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
+import 'package:project_note/services/heroAnimation.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -15,6 +20,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final controller = ScrollController();
+  Storage storage = Storage();
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
     await getMessages();
@@ -91,8 +97,62 @@ class _HomeState extends State<Home> {
 
   Widget iconCreation(IconData icons, Color color, String text) {
     return InkWell(
-      onTap: () {
-        print(text);
+      onTap: () async {
+        var uuid = Uuid();
+        var newfilename = uuid.v1();
+
+        if (text == 'Gallery') {
+          final results = await FilePicker.platform.pickFiles(
+              allowMultiple: false,
+              type: FileType.custom,
+              allowedExtensions: ['png', 'jpg']);
+          if (results == null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('No File Was Selected.'),
+            ));
+            return null;
+          }
+
+          final path = results.files.single.path;
+          final fileName = results.files.single.name;
+
+          storage.uploadfile(path!, newfilename).then((value) async {
+            print('File has been uploaded');
+            try {
+              var response = await http
+                  .post(Uri.parse('http://localhost:3000/home'), headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+              }, body: {
+                'message': 'new message',
+                'path': newfilename.toString(),
+                'mediatype': 'image'
+              });
+
+              if (response.statusCode == 200) {
+                Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+                setState(() {
+                  messageslist.insert(
+                      0,
+                      Message(
+                          userName: jsonDecode['result']['username'],
+                          datetime: jsonDecode['result']['createdAt'],
+                          mediaType: 'image',
+                          message: jsonDecode['result']['text'],
+                          path: jsonDecode['result']['path']));
+                  newmessages++;
+                });
+
+                //print(jsonDecode);
+              } else {
+                //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
+                throw Exception('cannot store message');
+              }
+            } catch (e) {
+              print(e.toString());
+            }
+          });
+        } //print(text);
+        Navigator.pop(context);
       },
       child: Column(
         children: [
@@ -123,9 +183,14 @@ class _HomeState extends State<Home> {
 
   Future<void> sendmessage() async {
     try {
-      var response = await http.post(Uri.parse('http://localhost:3000/home'),
-          headers: {"Content-Type": "application/x-www-form-urlencoded"},
-          body: {'message': _messagecontroller.value.text.toString()});
+      var response =
+          await http.post(Uri.parse('http://localhost:3000/home'), headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }, body: {
+        'message': _messagecontroller.value.text.toString(),
+        'path': '',
+        'mediatype': 'text'
+      });
 
       if (response.statusCode == 200) {
         Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
@@ -135,7 +200,7 @@ class _HomeState extends State<Home> {
               Message(
                   userName: jsonDecode['result']['username'],
                   datetime: jsonDecode['result']['createdAt'],
-                  mediaType: jsonDecode['result']['path'] ?? 'text',
+                  mediaType: 'text',
                   message: jsonDecode['result']['text'],
                   path: jsonDecode['result']['path']));
           newmessages++;
@@ -175,21 +240,72 @@ class _HomeState extends State<Home> {
                         // String thismessage = formatter.format(FirstdateTime);
                         // String previousmessage = formatter.format(SeconddateTime);
                         // if(FirstdateTime.isBefore(SeconddateTime))
-
-                        return (Bubble(
-                            style: styleMe,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(messageslist[i].message.toString()),
-                                Text(
-                                  clockString,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                              ],
-                            )));
+                        if (messageslist[i].mediaType.compareTo('image') == 0) {
+                          print("Hi");
+                          return FutureBuilder(
+                              future: storage
+                                  .downloadURL(messageslist[i].path.toString()),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<String> snapshot) {
+                                if (snapshot.connectionState ==
+                                        ConnectionState.done &&
+                                    snapshot.hasData) {
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => PhotoHero(
+                                              photo: snapshot.data!,
+                                            ),
+                                          ));
+                                    },
+                                    child: Bubble(
+                                        style: styleMe,
+                                        child: Container(
+                                            color: Colors.white,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.6,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.45,
+                                            child: Image.network(snapshot.data!,
+                                                fit: BoxFit.cover))),
+                                  );
+                                } else if (snapshot.connectionState ==
+                                        ConnectionState.waiting ||
+                                    !snapshot.hasData) {
+                                  return Bubble(
+                                      style: styleMe,
+                                      child: CircularProgressIndicator());
+                                } else {
+                                  return Bubble(
+                                      style: styleMe,
+                                      child: CircularProgressIndicator());
+                                }
+                              });
+                        } else {
+                          print(messageslist[i].mediaType.compareTo("image") ==
+                              0);
+                          print(messageslist[i].mediaType);
+                          return (Bubble(
+                              style: styleMe,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(messageslist[i].message.toString()),
+                                  Text(
+                                    clockString,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                ],
+                              )));
+                        }
                       } else {
                         if (IsLastPage) {
                           return const Padding(
@@ -224,7 +340,7 @@ class _HomeState extends State<Home> {
                   color: Colors.black,
                 )),
             Container(
-              width: MediaQuery.of(context).size.width * 0.85,
+              width: MediaQuery.of(context).size.width * 0.75,
               child: TextField(
                 controller: _messagecontroller,
                 maxLines: 3,

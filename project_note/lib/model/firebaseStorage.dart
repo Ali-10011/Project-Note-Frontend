@@ -19,7 +19,7 @@ class Storage {
 
   Future<String> downloadURL(String imageName) async {
     try {
-      String downloadURL = await storage.ref('${imageName}').getDownloadURL();
+      String downloadURL = await storage.ref('Images/${imageName}').getDownloadURL();
       return downloadURL;
     } on firebase_core.FirebaseException catch (e) {
       print(e);

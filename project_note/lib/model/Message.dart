@@ -36,18 +36,22 @@ Future<void> getMessages() async {
       pageno++;
     }
     for (int i = 0; i < data.length; i++) {
+      print(data[i]['mediatype']);
       messageslist.add(Message(
           userName: data[i]['username'],
           datetime: data[i]['createdAt'],
-          mediaType: data[i]['path'] ?? 'text',
+          mediaType: data[i]['mediatype'],
           message: data[i]['text'],
           path: data[i]['path']));
+    }
+    for (int i = 0; i < messageslist.length; i++) {
+      print(messageslist[i].mediaType);
     }
     for (int i = 0; i < data.length; i++) {
       dynamic dateTimeString = data[i]['createdAt'];
       final dateTime = DateTime.parse(dateTimeString);
-   final DateFormat formatter = DateFormat('yyyy-MM-dd');
-   String formatted = formatter.format(dateTime);
+      final DateFormat formatter = DateFormat('yyyy-MM-dd');
+      String formatted = formatter.format(dateTime);
       print('${formatted}');
     }
 
