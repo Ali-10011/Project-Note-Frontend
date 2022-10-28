@@ -19,22 +19,27 @@ class LoadingState extends StatefulWidget {
 
 class _LoadingStateState extends State<LoadingState> {
   Future<void> getMessages() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/home'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body) as List<dynamic>;
-      for (int i = 0; i < data.length; i++) {
-        messageslist.add(Message(
-            userName: data[i]['username'],
-            datetime: data[i]['createdAt'],
-            mediaType: data[i]['mediatype'],
-            message: data[i]['text'],
-            path: data[i]['path']));
+    try {
+      final response = await http.get(Uri.parse('http://localhost:3000/home'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List<dynamic>;
+        for (int i = 0; i < data.length; i++) {
+          messageslist.add(Message(
+              userName: data[i]['username'],
+              datetime: data[i]['createdAt'],
+              mediaType: data[i]['mediatype'],
+              message: data[i]['text'],
+              path: data[i]['path']));
+        }
+        // for (int i = 0; i < data.length; i++) {
+        //   print('${messageslist[i].message}  ${messageslist[i].date}');
+        // }
+      } else {
+        Navigator.pushReplacementNamed(context, '/err');
+        //throw Exception("Failed to load messages");
       }
-      // for (int i = 0; i < data.length; i++) {
-      //   print('${messageslist[i].message}  ${messageslist[i].date}');
-      // }
-    } else {
-      throw Exception("Failed to load messages");
+    } catch (e) {
+      Navigator.pushReplacementNamed(context, '/err');
     }
   }
 
@@ -48,12 +53,17 @@ class _LoadingStateState extends State<LoadingState> {
   void initState() {
     WaitForData();
     super.initState();
+
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   //prevents dirty descendants that are created when
+
+    // });
   }
 
   Widget build(BuildContext context) {
     Storage storage = Storage();
     return Scaffold(
-      body: CircularProgressIndicator(),
+      body: Center(child: CircularProgressIndicator()),
       //     body: Container(
       //   child: Column(
       //     children: [

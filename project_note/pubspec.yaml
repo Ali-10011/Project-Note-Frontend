@@ -36,14 +36,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   uuid: ^3.0.6
+  async: ^2.9.0
   http:
   bubble:
+  video_player:
   flutter_spinkit:
   intl:
   firebase_core: ^1.22.0
   firebase_storage: ^10.3.8
-  image_picker: ^0.8.5+3
+  cached_network_image: ^3.2.2
   file_picker:
+  cached_video_player: ^2.0.3
 
 dev_dependencies:
   flutter_test:

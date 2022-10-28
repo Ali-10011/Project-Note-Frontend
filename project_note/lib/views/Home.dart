@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,10 @@ import 'package:project_note/model/firebaseStorage.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:project_note/services/heroAnimation.dart';
+import 'package:video_player/video_player.dart';
+import 'package:project_note/services/videoPlayer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_video_player/cached_video_player.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -20,11 +25,25 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final controller = ScrollController();
+  late CachedVideoPlayerController _videocontroller =
+      CachedVideoPlayerController.network('');
+  late Future<void> _initializeVideoPlayerFuture;
+
   Storage storage = Storage();
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
     await getMessages();
     setState(() {});
+  }
+
+  Future<void> initPlayer(String fileurl) async {
+    _videocontroller = CachedVideoPlayerController.network(fileurl);
+    return await _videocontroller.initialize().then((value) {
+      //_videocontroller.play();
+    });
+    //  _initializeVideoPlayerFuture = _videocontroller.initialize();
+    // _videocontroller.play();
+    // return _initializeVideoPlayerFuture;
   }
 
   @override
@@ -42,6 +61,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     controller.dispose();
+    _videocontroller.dispose();
     super.dispose();
   }
 
@@ -114,44 +134,52 @@ class _HomeState extends State<Home> {
           }
 
           final path = results.files.single.path;
-          final fileName = results.files.single.name;
+          //final newfileName = results.files.single.name;
 
           storage.uploadfile(path!, newfilename).then((value) async {
             print('File has been uploaded');
-            try {
-              var response = await http
-                  .post(Uri.parse('http://localhost:3000/home'), headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-              }, body: {
+            storage.downloadURL(newfilename).then((value) async {
+              print('File has been downloaded');
+              print(value);
+              Map<dynamic, dynamic> param = {
                 'message': 'new message',
-                'path': newfilename.toString(),
+                'path': value.toString(),
                 'mediatype': 'image'
-              });
-
-              if (response.statusCode == 200) {
-                Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-                setState(() {
-                  messageslist.insert(
-                      0,
-                      Message(
-                          userName: jsonDecode['result']['username'],
-                          datetime: jsonDecode['result']['createdAt'],
-                          mediaType: 'image',
-                          message: jsonDecode['result']['text'],
-                          path: jsonDecode['result']['path']));
-                  newmessages++;
-                });
-
-                //print(jsonDecode);
-              } else {
-                //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
-                throw Exception('cannot store message');
-              }
-            } catch (e) {
-              print(e.toString());
-            }
+              };
+              sendmessage(param);
+            });
+          }).onError((error, stackTrace) {
+            throw (error.toString());
           });
-        } //print(text);
+        } //print(text);"
+        else if (text == 'Camera') {
+          final results = await FilePicker.platform.pickFiles(
+              allowMultiple: false,
+              type: FileType.custom,
+              allowedExtensions: ['mp4', 'mov']);
+          if (results == null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('No Video Was Selected.'),
+            ));
+            return null;
+          }
+
+          final path = results.files.single.path;
+          //final newfileName = results.files.single.name;
+          storage.uploadvideo(path!, newfilename).then((value) async {
+            //returns a promise
+            print('Video has been uploaded');
+            storage.downloadvideo(newfilename).then((value) {
+              print(value);
+              Map<dynamic, dynamic> param = {
+                'message': 'new message',
+                'path': value.toString(),
+                'mediatype': 'video'
+              };
+              sendmessage(param);
+            });
+          });
+        }
         Navigator.pop(context);
       },
       child: Column(
@@ -181,16 +209,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> sendmessage() async {
+  Future<void> sendmessage(Map<dynamic, dynamic> map) async {
     try {
-      var response =
-          await http.post(Uri.parse('http://localhost:3000/home'), headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }, body: {
-        'message': _messagecontroller.value.text.toString(),
-        'path': '',
-        'mediatype': 'text'
-      });
+      var response = await http.post(Uri.parse('http://localhost:3000/home'),
+          headers: {"Content-Type": "application/x-www-form-urlencoded"},
+          body: map);
 
       if (response.statusCode == 200) {
         Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
@@ -200,13 +223,11 @@ class _HomeState extends State<Home> {
               Message(
                   userName: jsonDecode['result']['username'],
                   datetime: jsonDecode['result']['createdAt'],
-                  mediaType: 'text',
+                  mediaType: jsonDecode['result']['mediatype'],
                   message: jsonDecode['result']['text'],
                   path: jsonDecode['result']['path']));
           newmessages++;
         });
-
-        //print(jsonDecode);
       } else {
         //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
         throw Exception('cannot store message');
@@ -215,6 +236,12 @@ class _HomeState extends State<Home> {
       print(e.toString());
     }
     _messagecontroller.clear();
+  }
+
+  void InitializeController() async {
+    await getMessages();
+    pageno++;
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   Widget build(BuildContext context) {
@@ -234,36 +261,65 @@ class _HomeState extends State<Home> {
                         final format = DateFormat("h:mma");
                         final clockString = format
                             .format(DateTime.parse(messageslist[i].datetime));
-                        // DateTime FirstdateTime = DateTime.parse(messageslist[i].datetime); //current message
-                        //   DateTime SeconddateTime = DateTime.parse(messageslist[i].datetime);
-                        // final DateFormat formatter = DateFormat('yyyy-MM-dd');
-                        // String thismessage = formatter.format(FirstdateTime);
-                        // String previousmessage = formatter.format(SeconddateTime);
-                        // if(FirstdateTime.isBefore(SeconddateTime))
                         if (messageslist[i].mediaType.compareTo('image') == 0) {
-                          print("Hi");
-                          return FutureBuilder(
-                              future: storage
-                                  .downloadURL(messageslist[i].path.toString()),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<String> snapshot) {
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PhotoHero(
+                                      photo: messageslist[i].path!,
+                                    ),
+                                  ));
+                            },
+                            child: Bubble(
+                                style: styleMe,
+                                child: Container(
+                                  color: Colors.white,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.6,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.45,
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    imageUrl: messageslist[i].path!,
+                                    progressIndicatorBuilder: (context, url,
+                                            downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  ),
+                                )),
+                          );
+                        } else if (messageslist[i]
+                                .mediaType
+                                .compareTo('video') ==
+                            0) {
+                          //initPlayer(messageslist[i].path!);
+                          return Container(
+                            // width: MediaQuery.of(context).size.width * 0.6,
+                            // height: MediaQuery.of(context).size.height * 0.45,
+                            child: FutureBuilder(
+                              future: initPlayer(messageslist[i].path!),
+                              builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
-                                        ConnectionState.done &&
-                                    snapshot.hasData) {
+                                    ConnectionState.done) {
                                   return InkWell(
                                     onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => PhotoHero(
-                                              photo: snapshot.data!,
-                                            ),
-                                          ));
+                                      print('Hello from inside');
+                                      // if (_videocontroller.value.isPlaying) {
+                                      //   _videocontroller.pause();
+                                      // } else {
+                                      //   // If the video is paused, play it.
+                                      //   _videocontroller.play();
+                                      // }
                                     },
                                     child: Bubble(
-                                        style: styleMe,
-                                        child: Container(
-                                            color: Colors.white,
+                                      style: styleMe,
+                                      child: Stack(
+                                        children: [
+                                          Container(
                                             width: MediaQuery.of(context)
                                                     .size
                                                     .width *
@@ -272,25 +328,102 @@ class _HomeState extends State<Home> {
                                                     .size
                                                     .height *
                                                 0.45,
-                                            child: Image.network(snapshot.data!,
-                                                fit: BoxFit.cover))),
+                                            color: Colors.white,
+                                            // width: MediaQuery.of(context)
+                                            //         .size
+                                            //         .width *
+                                            //     0.6,
+                                            // height: MediaQuery.of(context)
+                                            //         .size
+                                            //         .height *
+                                            //     0.45,
+                                            child: CachedVideoPlayer(
+                                                _videocontroller),
+                                          ),
+                                          Positioned(
+                                              top: MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  5.5,
+                                              left: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  4.5,
+                                              child: IconButton(
+                                                  iconSize: 50,
+                                                  onPressed: () {
+                                                    if (_videocontroller
+                                                        .value.isPlaying) {
+                                                      _videocontroller.pause();
+                                                    } else {
+                                                      // If the video is paused, play it.
+                                                      _videocontroller.play();
+                                                    }
+
+                                                    print('Inside');
+                                                  },
+                                                  icon: Icon(
+                                                      color: Colors.white,
+                                                      _videocontroller
+                                                              .value.isPlaying
+                                                          ? Icons
+                                                              .pause_circle_filled_outlined
+                                                          : Icons
+                                                              .play_arrow_rounded,
+                                                      size: 60))),
+                                        ],
+                                      ),
+                                    ),
                                   );
-                                } else if (snapshot.connectionState ==
-                                        ConnectionState.waiting ||
-                                    !snapshot.hasData) {
-                                  return Bubble(
-                                      style: styleMe,
-                                      child: CircularProgressIndicator());
                                 } else {
                                   return Bubble(
-                                      style: styleMe,
-                                      child: CircularProgressIndicator());
+                                    style: styleMe,
+                                    child: Container(
+                                        color: Colors.black,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.6,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.45,
+                                        child: Center(
+                                            child:
+                                                CircularProgressIndicator())),
+                                  );
                                 }
-                              });
+                              },
+                            ),
+                          );
+                          // return InkWell(
+                          //     onTap: () async {
+                          //       // _videocontroller =
+                          //       //     CachedVideoPlayerController.network(
+                          //       //         messageslist[i].path!);
+                          //       // await _videocontroller
+                          //       //     .initialize()
+                          //       //     .then((value) {
+                          //       //   _videocontroller.play();
+                          //       //   setState(() {});
+                          //       // });
+                          //     },
+                          //     child: Bubble(
+                          //         style: styleMe,
+                          //         child: Container(
+                          //             color: Colors.white,
+                          //             width: MediaQuery.of(context).size.width *
+                          //                 0.6,
+                          //             height:
+                          //                 MediaQuery.of(context).size.height *
+                          //                     0.45,
+                          //             child: _videocontroller
+                          //                     .value.isInitialized
+                          //                 ? AspectRatio(
+                          //                     aspectRatio: _videocontroller
+                          //                         .value.aspectRatio,
+                          //                     child: CachedVideoPlayer(
+                          //                         _videocontroller))
+                          //                 : const CircularProgressIndicator())));
                         } else {
-                          print(messageslist[i].mediaType.compareTo("image") ==
-                              0);
-                          print(messageslist[i].mediaType);
                           return (Bubble(
                               style: styleMe,
                               child: Column(
@@ -322,7 +455,11 @@ class _HomeState extends State<Home> {
           ),
         ),
       ]),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context)
+                .viewInsets
+                .bottom), //if a UI element comes about this padding, this padding will be auto lifted above it
         //color: Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -364,7 +501,14 @@ class _HomeState extends State<Home> {
               ),
             ),
             IconButton(
-                onPressed: sendmessage,
+                onPressed: () {
+                  Map<dynamic, dynamic> param = {
+                    'message': _messagecontroller.value.text.toString(),
+                    'path': '',
+                    'mediatype': 'text'
+                  };
+                  sendmessage(param);
+                },
                 icon: Icon(
                   Icons.send,
                   color: Colors.blueAccent,
@@ -375,3 +519,109 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+
+// Positioned(
+//                                         top: 100,
+//                                         child: Container(
+//                                           padding: const EdgeInsets.all(0.0),
+//                                           child: Center(
+//                                             child: IconButton(
+//                                                 onPressed: () {
+//                                                   print('Hello from outside');
+//                                                 },
+//                                                 icon: Icon(
+//                                                     Icons.play_arrow_rounded,
+//                                                     size: 50,
+//                                                     color: Colors.black)),
+//                                           ),
+//                                         ),
+//                                       ),
+
+
+
+
+
+// FutureBuilder(
+//                             future: initPlayer(messageslist[i].path!),
+//                             builder: (context, snapshot) {
+//                               if (snapshot.connectionState ==
+//                                   ConnectionState.done) {
+//                                 return InkWell(
+//                                   onTap: () {
+//                                     print('Hello from inside');
+//                                     // if (_videocontroller.value.isPlaying) {
+//                                     //   _videocontroller.pause();
+//                                     // } else {
+//                                     //   // If the video is paused, play it.
+//                                     //   _videocontroller.play();
+//                                     // }
+//                                   },
+//                                   child: Bubble(
+//                                     style: styleMe,
+//                                     child: Stack(
+//                                       children: [
+//                                         Container(
+//                                           color: Colors.white,
+//                                           width: MediaQuery.of(context)
+//                                                   .size
+//                                                   .width *
+//                                               0.6,
+//                                           height: MediaQuery.of(context)
+//                                                   .size
+//                                                   .height *
+//                                               0.45,
+//                                           child: CachedVideoPlayer(
+//                                               _videocontroller),
+//                                         ),
+//                                         Positioned(
+//                                             top: MediaQuery.of(context)
+//                                                     .size
+//                                                     .height /
+//                                                 5.5,
+//                                             left: MediaQuery.of(context)
+//                                                     .size
+//                                                     .width /
+//                                                 4.5,
+//                                             child: IconButton(
+//                                                 iconSize: 50,
+//                                                 onPressed: () {
+//                                                   if (_videocontroller
+//                                                       .value.isPlaying) {
+//                                                     _videocontroller.pause();
+//                                                   } else {
+//                                                     // If the video is paused, play it.
+//                                                     _videocontroller.play();
+//                                                   }
+
+//                                                   print('Inside');
+//                                                 },
+//                                                 icon: Icon(
+//                                                     color: Colors.white,
+//                                                     _videocontroller
+//                                                             .value.isPlaying
+//                                                         ? Icons
+//                                                             .pause_circle_filled_outlined
+//                                                         : Icons
+//                                                             .play_arrow_rounded,
+//                                                     size: 60))),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 );
+//                               } else {
+//                                 return Bubble(
+//                                   style: styleMe,
+//                                   child: Container(
+//                                       color: Colors.black,
+//                                       width: MediaQuery.of(context).size.width *
+//                                           0.6,
+//                                       height:
+//                                           MediaQuery.of(context).size.height *
+//                                               0.45,
+//                                       child: Center(
+//                                           child: CircularProgressIndicator())),
+//                                 );
+//                               }
+//                             },
+//                           );
