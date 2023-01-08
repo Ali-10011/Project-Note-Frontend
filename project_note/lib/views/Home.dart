@@ -25,6 +25,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final controller = ScrollController();
+  late CachedVideoPlayerController _videocontroller =
+      CachedVideoPlayerController.network('');
+  late Future<void> _initializeVideoPlayerFuture;
 
   Storage storage = Storage();
   late TextEditingController _messagecontroller = TextEditingController();
@@ -33,9 +36,14 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
-  Future<void> initPlayer(
-      String fileurl, CachedVideoPlayerController _videocontroller) async {
-    return await _videocontroller.initialize();
+  Future<void> initPlayer(String fileurl) async {
+    _videocontroller = CachedVideoPlayerController.network(fileurl);
+    return await _videocontroller.initialize().then((value) {
+      //_videocontroller.play();
+    });
+    //  _initializeVideoPlayerFuture = _videocontroller.initialize();
+    // _videocontroller.play();
+    // return _initializeVideoPlayerFuture;
   }
 
   @override
@@ -53,7 +61,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     controller.dispose();
-
+    _videocontroller.dispose();
     super.dispose();
   }
 
@@ -288,54 +296,49 @@ class _HomeState extends State<Home> {
                                 .mediaType
                                 .compareTo('video') ==
                             0) {
-                          late CachedVideoPlayerController _videocontroller =
-                              CachedVideoPlayerController.network(
-                                  messageslist[i].path!);
+                          //initPlayer(messageslist[i].path!);
                           return Container(
+                            // width: MediaQuery.of(context).size.width * 0.6,
+                            // height: MediaQuery.of(context).size.height * 0.45,
                             child: FutureBuilder(
-                              future: initPlayer(
-                                  messageslist[i].path!, _videocontroller),
+                              future: initPlayer(messageslist[i].path!),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.done) {
                                   return InkWell(
                                     onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => VideoHero(
-                                              video: messageslist[i].path!,
-                                            ),
-                                          ));
+                                      print('Hello from inside');
+                                      // if (_videocontroller.value.isPlaying) {
+                                      //   _videocontroller.pause();
+                                      // } else {
+                                      //   // If the video is paused, play it.
+                                      //   _videocontroller.play();
+                                      // }
                                     },
                                     child: Bubble(
                                       style: styleMe,
                                       child: Stack(
                                         children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.6,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.45,
-                                                color: Colors.white,
-                                                child: CachedVideoPlayer(
-                                                    _videocontroller),
-                                              ),
-                                              Text(
-                                                clockString,
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12),
-                                              ),
-                                            ],
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.6,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.45,
+                                            color: Colors.white,
+                                            // width: MediaQuery.of(context)
+                                            //         .size
+                                            //         .width *
+                                            //     0.6,
+                                            // height: MediaQuery.of(context)
+                                            //         .size
+                                            //         .height *
+                                            //     0.45,
+                                            child: CachedVideoPlayer(
+                                                _videocontroller),
                                           ),
                                           Positioned(
                                               top: MediaQuery.of(context)
@@ -348,10 +351,25 @@ class _HomeState extends State<Home> {
                                                   4.5,
                                               child: IconButton(
                                                   iconSize: 50,
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                    if (_videocontroller
+                                                        .value.isPlaying) {
+                                                      _videocontroller.pause();
+                                                    } else {
+                                                      // If the video is paused, play it.
+                                                      _videocontroller.play();
+                                                    }
+
+                                                    print('Inside');
+                                                  },
                                                   icon: Icon(
                                                       color: Colors.white,
-                                                      Icons.play_arrow_rounded,
+                                                      _videocontroller
+                                                              .value.isPlaying
+                                                          ? Icons
+                                                              .pause_circle_filled_outlined
+                                                          : Icons
+                                                              .play_arrow_rounded,
                                                       size: 60))),
                                         ],
                                       ),
@@ -376,6 +394,35 @@ class _HomeState extends State<Home> {
                               },
                             ),
                           );
+                          // return InkWell(
+                          //     onTap: () async {
+                          //       // _videocontroller =
+                          //       //     CachedVideoPlayerController.network(
+                          //       //         messageslist[i].path!);
+                          //       // await _videocontroller
+                          //       //     .initialize()
+                          //       //     .then((value) {
+                          //       //   _videocontroller.play();
+                          //       //   setState(() {});
+                          //       // });
+                          //     },
+                          //     child: Bubble(
+                          //         style: styleMe,
+                          //         child: Container(
+                          //             color: Colors.white,
+                          //             width: MediaQuery.of(context).size.width *
+                          //                 0.6,
+                          //             height:
+                          //                 MediaQuery.of(context).size.height *
+                          //                     0.45,
+                          //             child: _videocontroller
+                          //                     .value.isInitialized
+                          //                 ? AspectRatio(
+                          //                     aspectRatio: _videocontroller
+                          //                         .value.aspectRatio,
+                          //                     child: CachedVideoPlayer(
+                          //                         _videocontroller))
+                          //                 : const CircularProgressIndicator())));
                         } else {
                           return (Bubble(
                               style: styleMe,
@@ -472,3 +519,109 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+
+// Positioned(
+//                                         top: 100,
+//                                         child: Container(
+//                                           padding: const EdgeInsets.all(0.0),
+//                                           child: Center(
+//                                             child: IconButton(
+//                                                 onPressed: () {
+//                                                   print('Hello from outside');
+//                                                 },
+//                                                 icon: Icon(
+//                                                     Icons.play_arrow_rounded,
+//                                                     size: 50,
+//                                                     color: Colors.black)),
+//                                           ),
+//                                         ),
+//                                       ),
+
+
+
+
+
+// FutureBuilder(
+//                             future: initPlayer(messageslist[i].path!),
+//                             builder: (context, snapshot) {
+//                               if (snapshot.connectionState ==
+//                                   ConnectionState.done) {
+//                                 return InkWell(
+//                                   onTap: () {
+//                                     print('Hello from inside');
+//                                     // if (_videocontroller.value.isPlaying) {
+//                                     //   _videocontroller.pause();
+//                                     // } else {
+//                                     //   // If the video is paused, play it.
+//                                     //   _videocontroller.play();
+//                                     // }
+//                                   },
+//                                   child: Bubble(
+//                                     style: styleMe,
+//                                     child: Stack(
+//                                       children: [
+//                                         Container(
+//                                           color: Colors.white,
+//                                           width: MediaQuery.of(context)
+//                                                   .size
+//                                                   .width *
+//                                               0.6,
+//                                           height: MediaQuery.of(context)
+//                                                   .size
+//                                                   .height *
+//                                               0.45,
+//                                           child: CachedVideoPlayer(
+//                                               _videocontroller),
+//                                         ),
+//                                         Positioned(
+//                                             top: MediaQuery.of(context)
+//                                                     .size
+//                                                     .height /
+//                                                 5.5,
+//                                             left: MediaQuery.of(context)
+//                                                     .size
+//                                                     .width /
+//                                                 4.5,
+//                                             child: IconButton(
+//                                                 iconSize: 50,
+//                                                 onPressed: () {
+//                                                   if (_videocontroller
+//                                                       .value.isPlaying) {
+//                                                     _videocontroller.pause();
+//                                                   } else {
+//                                                     // If the video is paused, play it.
+//                                                     _videocontroller.play();
+//                                                   }
+
+//                                                   print('Inside');
+//                                                 },
+//                                                 icon: Icon(
+//                                                     color: Colors.white,
+//                                                     _videocontroller
+//                                                             .value.isPlaying
+//                                                         ? Icons
+//                                                             .pause_circle_filled_outlined
+//                                                         : Icons
+//                                                             .play_arrow_rounded,
+//                                                     size: 60))),
+//                                       ],
+//                                     ),
+//                                   ),
+//                                 );
+//                               } else {
+//                                 return Bubble(
+//                                   style: styleMe,
+//                                   child: Container(
+//                                       color: Colors.black,
+//                                       width: MediaQuery.of(context).size.width *
+//                                           0.6,
+//                                       height:
+//                                           MediaQuery.of(context).size.height *
+//                                               0.45,
+//                                       child: Center(
+//                                           child: CircularProgressIndicator())),
+//                                 );
+//                               }
+//                             },
+//                           );
