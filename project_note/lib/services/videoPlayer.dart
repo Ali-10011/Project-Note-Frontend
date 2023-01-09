@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'dart:async';
 import 'package:video_player/video_player.dart';
-import 'package:cached_video_player/cached_video_player.dart';
 
 class VideoHero extends StatefulWidget {
   const VideoHero({Key? key, required this.video}) : super(key: key);
@@ -13,12 +12,12 @@ class VideoHero extends StatefulWidget {
 
 class _VideoHeroState extends State<VideoHero> {
   @override
-  late CachedVideoPlayerController _videocontroller;
+  late VideoPlayerController _videocontroller;
   late Future<void> _initializeVideoPlayerFuture;
   @override
   void initState() {
     super.initState();
-    _videocontroller = CachedVideoPlayerController.network(widget.video);
+    _videocontroller = VideoPlayerController.network(widget.video);
 
     // Initialize the controller and store the Future for later use.
     _initializeVideoPlayerFuture =
@@ -40,7 +39,6 @@ class _VideoHeroState extends State<VideoHero> {
   Widget build(BuildContext context) {
     timeDilation = 1.3;
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(),
       // Use a FutureBuilder to display a loading spinner while waiting for the
       // VideoPlayerController to finish initializing.
@@ -55,7 +53,7 @@ class _VideoHeroState extends State<VideoHero> {
               return AspectRatio(
                   aspectRatio: _videocontroller.value.aspectRatio,
                   // Use the VideoPlayer widget to display the video.
-                  child: CachedVideoPlayer(_videocontroller));
+                  child: VideoPlayer(_videocontroller));
             } else {
               // If the VideoPlayerController is still initializing, show a
               // loading spinner.
