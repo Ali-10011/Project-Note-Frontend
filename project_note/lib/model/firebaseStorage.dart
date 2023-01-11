@@ -8,18 +8,24 @@ class Storage {
       firebase_storage.FirebaseStorage.instanceFor(
           bucket: "gs://project-note-bca4a.appspot.com");
 
-  Future<void> uploadfile(String filePath, String fileName) async {
+  Future<String> uploadfile(String filePath, String fileName) async {
+    final imageref = storage.ref('Images/${fileName}');
     File file = File(filePath);
+
     try {
-      await storage.ref('Images/$fileName').putFile(file);
+      await imageref.putFile(file);
+      String url = await imageref.getDownloadURL();
+      return url;
     } on firebase_core.FirebaseException catch (e) {
       print(e);
+      throw Exception('Firebase Error: ${e}');
     }
   }
 
   Future<String> downloadURL(String imageName) async {
     try {
-      String downloadURL = await storage.ref('Images/${imageName}').getDownloadURL();
+      String downloadURL =
+          await storage.ref('Images/${imageName}').getDownloadURL();
       return downloadURL;
     } on firebase_core.FirebaseException catch (e) {
       print(e);

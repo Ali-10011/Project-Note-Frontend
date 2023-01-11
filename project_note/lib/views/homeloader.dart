@@ -18,6 +18,9 @@ class LoadingState extends StatefulWidget {
 }
 
 class _LoadingStateState extends State<LoadingState> {
+  Storage storage = Storage();
+  
+
   Future<void> getMessages() async {
     final response = await http.get(Uri.parse('http://localhost:3000/home'));
     if (response.statusCode == 200) {
@@ -38,6 +41,13 @@ class _LoadingStateState extends State<LoadingState> {
     }
   }
 
+  Future<void> getUrls() async{
+    for(int i = 0; i < messageslist.length; i++)
+    {
+      
+    }
+  }
+
   void WaitForData() async {
     await getMessages();
     pageno++;
@@ -46,14 +56,14 @@ class _LoadingStateState extends State<LoadingState> {
 
   @override
   void initState() {
-    WaitForData();
     super.initState();
+    WaitForData();
   }
 
   Widget build(BuildContext context) {
     Storage storage = Storage();
     return Scaffold(
-      body: CircularProgressIndicator(),
+      body: Center(child: CircularProgressIndicator()),
       //     body: Container(
       //   child: Column(
       //     children: [

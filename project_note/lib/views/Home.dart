@@ -7,9 +7,9 @@ import 'package:project_note/globals/globals.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:project_note/model/firebaseStorage.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:project_note/services/heroAnimation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -43,6 +43,16 @@ class _HomeState extends State<Home> {
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  void clearCache() {
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    setState(() {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Images Reloaded !"),
+      ));
+    });
   }
 
   Widget bottomSheet() {
@@ -117,14 +127,16 @@ class _HomeState extends State<Home> {
           final fileName = results.files.single.name;
 
           storage.uploadfile(path!, newfilename).then((value) async {
-            print('File has been uploaded');
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Image Sent !'),
+            ));
             try {
               var response = await http
                   .post(Uri.parse('http://localhost:3000/home'), headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
               }, body: {
                 'message': 'new message',
-                'path': newfilename.toString(),
+                'path': value,
                 'mediatype': 'image'
               });
 
@@ -219,6 +231,21 @@ class _HomeState extends State<Home> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.clear_all,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              clearCache();
+              // do something
+            },
+          )
+        ],
+      ),
       body: CustomScrollView(controller: controller, reverse: true, slivers: [
         SliverToBoxAdapter(
           child: Container(
@@ -241,52 +268,30 @@ class _HomeState extends State<Home> {
                         // String previousmessage = formatter.format(SeconddateTime);
                         // if(FirstdateTime.isBefore(SeconddateTime))
                         if (messageslist[i].mediaType.compareTo('image') == 0) {
-                          print("Hi");
-                          return FutureBuilder(
-                              future: storage
-                                  .downloadURL(messageslist[i].path.toString()),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<String> snapshot) {
-                                if (snapshot.connectionState ==
-                                        ConnectionState.done &&
-                                    snapshot.hasData) {
-                                  return InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => PhotoHero(
-                                              photo: snapshot.data!,
-                                            ),
-                                          ));
-                                    },
-                                    child: Bubble(
-                                        style: styleMe,
-                                        child: Container(
-                                            color: Colors.white,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.6,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.45,
-                                            child: Image.network(snapshot.data!,
-                                                fit: BoxFit.cover))),
-                                  );
-                                } else if (snapshot.connectionState ==
-                                        ConnectionState.waiting ||
-                                    !snapshot.hasData) {
-                                  return Bubble(
-                                      style: styleMe,
-                                      child: CircularProgressIndicator());
-                                } else {
-                                  return Bubble(
-                                      style: styleMe,
-                                      child: CircularProgressIndicator());
-                                }
-                              });
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PhotoHero(
+                                      photo: messageslist[i].path.toString(),
+                                    ),
+                                  ));
+                            },
+                            child: Bubble(
+                                style: styleMe,
+                                child: Container(
+                                    color: Colors.white,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.45,
+                                    child: CachedNetworkImage(
+                                        key: UniqueKey(),
+                                        imageUrl:
+                                            messageslist[i].path.toString(),
+                                        fit: BoxFit.cover))),
+                          );
                         } else {
                           print(messageslist[i].mediaType.compareTo("image") ==
                               0);
@@ -306,13 +311,21 @@ class _HomeState extends State<Home> {
                                 ],
                               )));
                         }
+                      } else if (IsLastPage) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: Center(child: Text("All messages Loaded !")),
+                        );
+                      } else if (messageslist.length < LoadPerPage) {
+                        // do nothing
+                        return const Padding(
+                          padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
+                          child: Divider(
+                            height: 1,
+                            thickness: 5,
+                          ),
+                        );
                       } else {
-                        if (IsLastPage) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 32),
-                            child: Center(child: Text("All messages Loaded !")),
-                          );
-                        }
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: Center(child: CircularProgressIndicator()),
@@ -322,54 +335,58 @@ class _HomeState extends State<Home> {
           ),
         ),
       ]),
-      bottomNavigationBar: Container(
-        //color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-                //padding: EdgeInsets.all(0.0),
-                onPressed: () {
-                  showModalBottomSheet(
-                      backgroundColor: Colors.transparent,
-                      context: context,
-                      builder: (builder) => bottomSheet());
-                },
-                icon: Icon(
-                  Icons.add,
-                  color: Colors.black,
-                )),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.75,
-              child: TextField(
-                controller: _messagecontroller,
-                maxLines: 3,
-                minLines: 1,
-                keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      _messagecontroller.clear();
-                    },
-                    icon: Icon(Icons.clear),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.grey,
+      bottomNavigationBar: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          //color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                  //padding: EdgeInsets.all(0.0),
+                  onPressed: () {
+                    showModalBottomSheet(
+                        backgroundColor: Colors.transparent,
+                        context: context,
+                        builder: (builder) => bottomSheet());
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.black,
+                  )),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: TextField(
+                  controller: _messagecontroller,
+                  maxLines: 3,
+                  minLines: 1,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        _messagecontroller.clear();
+                      },
+                      icon: Icon(Icons.clear),
                     ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter Text',
                   ),
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter Text',
                 ),
               ),
-            ),
-            IconButton(
-                onPressed: sendmessage,
-                icon: Icon(
-                  Icons.send,
-                  color: Colors.blueAccent,
-                ))
-          ],
+              IconButton(
+                  onPressed: sendmessage,
+                  icon: Icon(
+                    Icons.send,
+                    color: Colors.blueAccent,
+                  ))
+            ],
+          ),
         ),
       ),
     );
