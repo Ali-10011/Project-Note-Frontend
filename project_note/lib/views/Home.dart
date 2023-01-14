@@ -23,7 +23,7 @@ class _HomeState extends State<Home> {
   Storage storage = Storage();
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
-    await getMessages();
+    await getMoreMessages();
     setState(() {});
   }
 
@@ -212,12 +212,14 @@ class _HomeState extends State<Home> {
               Message(
                   userName: jsonDecode['result']['username'],
                   datetime: jsonDecode['result']['createdAt'],
-                  mediaType: 'text',
+                  mediaType: 'text'.toString(),
                   message: jsonDecode['result']['text'],
                   path: jsonDecode['result']['path']));
           newmessages++;
+           print("CALLED THE FUNCTION IN HERE");
+        saveMessages();
         });
-
+       
         //print(jsonDecode);
       } else {
         //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
@@ -293,9 +295,7 @@ class _HomeState extends State<Home> {
                                         fit: BoxFit.cover))),
                           );
                         } else {
-                          print(messageslist[i].mediaType.compareTo("image") ==
-                              0);
-                          print(messageslist[i].mediaType);
+                  
                           return (Bubble(
                               style: styleMe,
                               child: Column(

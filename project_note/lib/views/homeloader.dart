@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:project_note/model/Message.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/model/firebaseStorage.dart';
-import 'package:bubble/bubble.dart';
-import 'package:project_note/globals/globals.dart';
-import 'package:project_note/services/heroAnimation.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -19,38 +15,13 @@ class LoadingState extends StatefulWidget {
 
 class _LoadingStateState extends State<LoadingState> {
   Storage storage = Storage();
+
   
 
-  Future<void> getMessages() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/home'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body) as List<dynamic>;
-      for (int i = 0; i < data.length; i++) {
-        messageslist.add(Message(
-            userName: data[i]['username'],
-            datetime: data[i]['createdAt'],
-            mediaType: data[i]['mediatype'],
-            message: data[i]['text'],
-            path: data[i]['path']));
-      }
-      // for (int i = 0; i < data.length; i++) {
-      //   print('${messageslist[i].message}  ${messageslist[i].date}');
-      // }
-    } else {
-      throw Exception("Failed to load messages");
-    }
-  }
 
-  Future<void> getUrls() async{
-    for(int i = 0; i < messageslist.length; i++)
-    {
-      
-    }
-  }
 
   void WaitForData() async {
-    await getMessages();
-    pageno++;
+    await loadMessages();
     Navigator.pushReplacementNamed(context, '/home');
   }
 

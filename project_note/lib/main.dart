@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:project_note/services/heroAnimation.dart';
 import 'package:project_note/views/Authentication.dart';
 import 'package:project_note/views/Home.dart';
 import 'package:project_note/views/errpage.dart';
