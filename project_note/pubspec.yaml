@@ -45,6 +45,7 @@ dependencies:
   file_picker:
   cached_network_image:
   shared_preferences: 
+  connectivity_plus:
 
 dev_dependencies:
   flutter_test:

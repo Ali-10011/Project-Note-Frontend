@@ -7,9 +7,11 @@ import 'package:project_note/globals/globals.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:project_note/model/firebaseStorage.dart';
+import 'package:project_note/views/errpage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:project_note/services/heroAnimation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:project_note/model/dataLoad.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -21,9 +23,19 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final controller = ScrollController();
   Storage storage = Storage();
+  DataLoad dataLoad = DataLoad();
+
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
-    await getMoreMessages();
+    try {
+      await getMoreMessages();
+    } on Exception catch (e) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ErrPage(statusCode: e.toString()),
+          ));
+    }
     setState(() {});
   }
 
@@ -33,7 +45,15 @@ class _HomeState extends State<Home> {
     controller.addListener(() {
       if (controller.position.maxScrollExtent == controller.offset) {
         if (!(IsLastPage)) {
-          LoadMore();
+          try {
+            LoadMore();
+          } on Exception catch (e) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ErrPage(statusCode: e.toString()),
+                ));
+          }
         }
       }
     });
@@ -55,6 +75,8 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void catchError(int statusCode) //can be used to identify errors in the future
+  {}
   Widget bottomSheet() {
     return Container(
       height: 278,
@@ -71,28 +93,28 @@ class _HomeState extends State<Home> {
                 children: [
                   iconCreation(
                       Icons.insert_drive_file, Colors.indigo, "Document"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.camera_alt, Colors.pink, "Camera"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.insert_photo, Colors.purple, "Gallery"),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   iconCreation(Icons.headset, Colors.orange, "Audio"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.location_pin, Colors.teal, "Location"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.person, Colors.blue, "Contact"),
@@ -108,16 +130,16 @@ class _HomeState extends State<Home> {
   Widget iconCreation(IconData icons, Color color, String text) {
     return InkWell(
       onTap: () async {
-        var uuid = Uuid();
+        var uuid = const Uuid();
         var newfilename = uuid.v1();
-
+        Navigator.pop(context);
         if (text == 'Gallery') {
           final results = await FilePicker.platform.pickFiles(
               allowMultiple: false,
               type: FileType.custom,
               allowedExtensions: ['png', 'jpg']);
           if (results == null) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('No File Was Selected.'),
             ));
             return null;
@@ -127,7 +149,7 @@ class _HomeState extends State<Home> {
           final fileName = results.files.single.name;
 
           storage.uploadfile(path!, newfilename).then((value) async {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Image Sent !'),
             ));
             try {
@@ -140,31 +162,35 @@ class _HomeState extends State<Home> {
                 'mediatype': 'image'
               });
 
-              if (response.statusCode == 200) {
-                Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-                setState(() {
-                  messageslist.insert(
-                      0,
-                      Message(
-                          userName: jsonDecode['result']['username'],
-                          datetime: jsonDecode['result']['createdAt'],
-                          mediaType: 'image',
-                          message: jsonDecode['result']['text'],
-                          path: jsonDecode['result']['path']));
-                  newmessages++;
-                });
-
-                //print(jsonDecode);
-              } else {
-                //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
-                throw Exception('cannot store message');
+              switch (response.statusCode) {
+                case 200:
+                  Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+                  setState(() {
+                    messageslist.insert(
+                        0,
+                        Message(
+                            userName: jsonDecode['result']['username'],
+                            datetime: jsonDecode['result']['createdAt'],
+                            mediaType: 'image',
+                            message: jsonDecode['result']['text'],
+                            path: jsonDecode['result']['path']));
+                    newmessages++;
+                  });
+                  break;
+                case 404:
+                  throw ("Cannot Find The Requested Resource");
+                default:
+                  throw (response.statusCode.toString());
               }
             } catch (e) {
-              print(e.toString());
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ErrPage(statusCode: e.toString()),
+                  ));
             }
           });
         } //print(text);
-        Navigator.pop(context);
       },
       child: Column(
         children: [
@@ -178,12 +204,12 @@ class _HomeState extends State<Home> {
               color: Colors.white,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               // fontWeight: FontWeight.w100,
             ),
@@ -204,29 +230,39 @@ class _HomeState extends State<Home> {
         'mediatype': 'text'
       });
 
-      if (response.statusCode == 200) {
-        Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-        setState(() {
-          messageslist.insert(
-              0,
-              Message(
-                  userName: jsonDecode['result']['username'],
-                  datetime: jsonDecode['result']['createdAt'],
-                  mediaType: 'text'.toString(),
-                  message: jsonDecode['result']['text'],
-                  path: jsonDecode['result']['path']));
-          newmessages++;
-           print("CALLED THE FUNCTION IN HERE");
-        saveMessages();
-        });
-       
+      switch (response.statusCode) {
+        case 200:
+          {
+            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+            setState(() {
+              messageslist.insert(
+                  0,
+                  Message(
+                      userName: jsonDecode['result']['username'],
+                      datetime: jsonDecode['result']['createdAt'],
+                      mediaType: 'text'.toString(),
+                      message: jsonDecode['result']['text'],
+                      path: jsonDecode['result']['path']));
+              newmessages++;
+              dataLoad.saveMessages();
+            });
+          }
+          break;
+        case 404:
+          throw ("Cannot Find The Requested Resource");
+        default:
+          print("This is the status code ${response.statusCode}");
+          throw (response.statusCode.toString());
+
         //print(jsonDecode);
-      } else {
-        //Navigator.pushReplacementNamed(context, '/err'); //thinking of directing to errpage if any exception comes
-        throw Exception('cannot store message');
       }
     } catch (e) {
       print(e.toString());
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ErrPage(statusCode: e.toString()),
+          ));
     }
     _messagecontroller.clear();
   }
@@ -234,10 +270,10 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: const Text('Home'),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.clear_all,
               color: Colors.white,
             ),
@@ -252,11 +288,11 @@ class _HomeState extends State<Home> {
         SliverToBoxAdapter(
           child: Container(
             child: (messageslist.isEmpty)
-                ? Center(child: Text('Start Typing.... '))
+                ? const Center(child: Text('Start Typing.... '))
                 : ListView.builder(
                     reverse: true,
                     shrinkWrap: true,
-                    physics: ClampingScrollPhysics(),
+                    physics: const ClampingScrollPhysics(),
                     itemCount: messageslist.length + 1,
                     itemBuilder: (context, i) {
                       if (i < messageslist.length) {
@@ -295,7 +331,6 @@ class _HomeState extends State<Home> {
                                         fit: BoxFit.cover))),
                           );
                         } else {
-                  
                           return (Bubble(
                               style: styleMe,
                               child: Column(
@@ -304,7 +339,7 @@ class _HomeState extends State<Home> {
                                   Text(messageslist[i].message.toString()),
                                   Text(
                                     clockString,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12),
                                   ),
@@ -351,7 +386,7 @@ class _HomeState extends State<Home> {
                         context: context,
                         builder: (builder) => bottomSheet());
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.add,
                     color: Colors.black,
                   )),
@@ -367,21 +402,21 @@ class _HomeState extends State<Home> {
                       onPressed: () {
                         _messagecontroller.clear();
                       },
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                     ),
-                    enabledBorder: OutlineInputBorder(
+                    enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Colors.grey,
                       ),
                     ),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     hintText: 'Enter Text',
                   ),
                 ),
               ),
               IconButton(
                   onPressed: sendmessage,
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,
                   ))

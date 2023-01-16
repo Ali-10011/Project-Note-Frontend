@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 
-class ErrPage extends StatefulWidget {
-  const ErrPage({Key? key}) : super(key: key);
+class ErrPage extends StatelessWidget {
+  final statusCode;
+  const ErrPage({super.key, this.statusCode});
 
-  @override
-  State<ErrPage> createState() => _ErrPageState();
-}
-
-class _ErrPageState extends State<ErrPage> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Could not load messages :(")),
-    );
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+      child: Text(statusCode, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),),
+    ));
   }
 }

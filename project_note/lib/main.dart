@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Note',
       initialRoute: '/initial',
       routes: {
-        '/': (context) => Auth(),
+        '/Auth': (context) => Auth(),
         '/home': (context) => Home(),
         '/initial': (context) => LoadingState(),
         '/err': (context) => ErrPage(),
