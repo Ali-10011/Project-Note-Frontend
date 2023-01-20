@@ -12,13 +12,14 @@ class Message {
   late String mediatype;
   late String message;
   late String path;
-
+  late String isUploaded;
   Message(
       {required this.username,
       required this.datetime,
       required this.mediatype,
       required this.message,
-      required this.path});
+      required this.path,
+      required this.isUploaded});
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
@@ -26,7 +27,8 @@ class Message {
         datetime: json['createdAt'],
         mediatype: json['mediatype'],
         message: json['message'],
-        path: json['path']);
+        path: json['path'],
+        isUploaded: json['isUploaded']);
   }
 
   Map<String, dynamic> toJson() => {
@@ -34,7 +36,8 @@ class Message {
         'createdAt': datetime,
         'mediatype': mediatype,
         'message': message,
-        'path': path
+        'path': path,
+        'isUploaded': isUploaded
       };
 }
 
@@ -49,20 +52,25 @@ Future<void> getMoreMessages() async {
     'http://localhost:3000/home?pageno=${pageno.toString()}&skip=${newmessages.toString()}&perpage=${LoadPerPage.toString()}',
   ));
 /**/
-  switch (response.statusCode) {
-    case 200:
-      final data = json.decode(response.body) as List<dynamic>;
-      if (data.length < 15) {
-        IsLastPage = true;
-      } else {
-        pageno++;
-      }
-       messageslist =
-          json.decode(response.body).map<Message>((message) => Message.fromJson(message)).toList();
-      break;
-    case 404:
-      throw ("Could not Find the Resource");
-    default:
-      throw (response.statusCode.toString());
+final data = json.decode(response.body) as List<dynamic>;
+  if (data.isNotEmpty) {
+    switch (response.statusCode) {
+      case 200:
+        
+        if (data.length < 15) {
+          IsLastPage = true;
+        } else {
+          pageno++;
+        }
+        messageslist = json
+            .decode(response.body)
+            .map<Message>((message) => Message.fromJson(message))
+            .toList();
+        break;
+      case 404:
+        throw ("Could not Find the Resource");
+      default:
+        throw (response.statusCode.toString());
+    }
   }
 }

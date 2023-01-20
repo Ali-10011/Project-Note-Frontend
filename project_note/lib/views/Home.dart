@@ -36,7 +36,6 @@ class _HomeState extends State<Home> {
             builder: (context) => ErrPage(statusCode: e.toString()),
           ));
     }
-    setState(() {});
   }
 
   @override
@@ -173,8 +172,10 @@ class _HomeState extends State<Home> {
                             datetime: jsonDecode['result']['createdAt'],
                             mediatype: 'image',
                             message: jsonDecode['result']['message'],
-                            path: jsonDecode['result']['path']));
+                            path: jsonDecode['result']['path'],
+                            isUploaded: jsonDecode['result']['isUploaded']));
                     newmessages++;
+                    dataLoad.saveMessages();
                   });
                   break;
                 case 404:
@@ -240,9 +241,10 @@ class _HomeState extends State<Home> {
                   Message(
                       username: jsonDecode['result']['username'],
                       datetime: jsonDecode['result']['createdAt'],
-                      mediatype: 'text'.toString(),
+                      mediatype: 'text',
                       message: jsonDecode['result']['message'],
-                      path: jsonDecode['result']['path']));
+                      path: jsonDecode['result']['path'],
+                      isUploaded: jsonDecode['result']['isUploaded']));
               newmessages++;
               dataLoad.saveMessages();
             });
@@ -251,13 +253,11 @@ class _HomeState extends State<Home> {
         case 404:
           throw ("Cannot Find The Requested Resource");
         default:
-          print("This is the status code ${response.statusCode}");
           throw (response.statusCode.toString());
 
         //print(jsonDecode);
       }
     } catch (e) {
-      print(e.toString());
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -265,6 +265,23 @@ class _HomeState extends State<Home> {
           ));
     }
     _messagecontroller.clear();
+  }
+
+  Future<void> sendOfflineMessage() async {
+    setState(() {
+      messageslist.insert(
+          0,
+          Message(
+              username:
+                  'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+              datetime: DateTime.now().toString(),
+              mediatype: 'text',
+              message: _messagecontroller.value.text.toString(),
+              path: '',
+              isUploaded: 'false'));
+      newmessages++;
+      dataLoad.saveMessages();
+    });
   }
 
   Widget build(BuildContext context) {
@@ -299,52 +316,103 @@ class _HomeState extends State<Home> {
                         final format = DateFormat("h:mma");
                         final clockString = format
                             .format(DateTime.parse(messageslist[i].datetime));
-                        // DateTime FirstdateTime = DateTime.parse(messageslist[i].datetime); //current message
-                        //   DateTime SeconddateTime = DateTime.parse(messageslist[i].datetime);
-                        // final DateFormat formatter = DateFormat('yyyy-MM-dd');
-                        // String thismessage = formatter.format(FirstdateTime);
-                        // String previousmessage = formatter.format(SeconddateTime);
-                        // if(FirstdateTime.isBefore(SeconddateTime))
                         if (messageslist[i].mediatype.compareTo('image') == 0) {
                           return InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PhotoHero(
-                                      photo: messageslist[i].path.toString(),
-                                    ),
-                                  ));
-                            },
-                            child: Bubble(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PhotoHero(
+                                        photo: messageslist[i].path.toString(),
+                                      ),
+                                    ));
+                              },
+                              child: Bubble(
                                 style: styleMe,
-                                child: Container(
-                                    color: Colors.white,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.6,
-                                    height: MediaQuery.of(context).size.height *
-                                        0.45,
-                                    child: CachedNetworkImage(
-                                        key: UniqueKey(),
-                                        imageUrl:
-                                            messageslist[i].path.toString(),
-                                        fit: BoxFit.cover))),
-                          );
+                                child: ListTile(
+                                  contentPadding:
+                                      EdgeInsets.only(left: 0.0, right: 0.0),
+                                  title: CachedNetworkImage(
+                                      key: UniqueKey(),
+                                      imageUrl: messageslist[i].path.toString(),
+                                      fit: BoxFit.cover),
+                                  subtitle: Row(children: <Widget>[
+                                    Text(
+                                      clockString,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Icon(
+                                        (messageslist[i].isUploaded == 'true')
+                                            ? Icons.check
+                                            : Icons.watch_outlined,
+                                        size: 12)
+                                  ]),
+                                ),
+                              )
+                              // child: Bubble(
+                              //     style: styleMe,
+                              //     child: Container(
+                              //       color: Colors.white,
+                              //       height:
+                              //           MediaQuery.of(context).size.height * 0.45,
+                              //       child: CachedNetworkImage(
+                              //           key: UniqueKey(),
+                              //           imageUrl: messageslist[i].path.toString(),
+                              //           fit: BoxFit.cover),
+                              //     )),
+                              );
                         } else {
                           return (Bubble(
-                              style: styleMe,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(messageslist[i].message.toString()),
-                                  Text(
-                                    clockString,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12),
-                                  ),
-                                ],
-                              )));
+                            style: styleMe,
+                            child: ListTile(
+                              contentPadding:
+                                  EdgeInsets.only(left: 0.0, right: 0.0),
+                              title: Text(messageslist[i].message.toString()),
+                              subtitle: Row(children: <Widget>[
+                                Text(
+                                  clockString,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
+                                ),
+                                SizedBox(width: 10),
+                                Icon(
+                                    (messageslist[i].isUploaded == 'true')
+                                        ? Icons.check
+                                        : Icons.watch_outlined,
+                                    size: 12)
+                              ]),
+                            ),
+                          )
+                              // child: Column(
+                              //   crossAxisAlignment: CrossAxisAlignment.end,
+                              //   children: [
+                              //     Text(messageslist[i].message.toString()),
+                              //     Text(
+                              //       clockString,
+                              //       style: const TextStyle(
+                              //           fontWeight: FontWeight.bold,
+                              //           fontSize: 12),
+                              //     ),
+                              //     const Icon(Icons.check, size: 12)
+                              // ListTile(
+                              //   title: Text(
+                              //     clockString,
+                              //     style: const TextStyle(
+                              //         fontWeight: FontWeight.bold,
+                              //         fontSize: 12),
+                              //   ),
+                              //   subtitle: Icon(
+                              //     Icons.check,
+                              //     size: 8,
+                              //   ),
+                              // )
+                              //   ],
+                              // ))
+                              );
                         }
                       } else if (IsLastPage) {
                         return const Padding(
