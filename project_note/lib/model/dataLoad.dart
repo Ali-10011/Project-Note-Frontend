@@ -18,17 +18,22 @@ class DataLoad {
   Future<void> loadMessages() async {
     //Load Messages from mobile storage
     final prefs = await SharedPreferences.getInstance();
-    try {
-      final data = json.decode(prefs.getString('messages')!);
-      if (data != null) {
-        for (int i = 0; i < data.length; i++) {
-          messageslist.add(Message(
-              userName: data[i]['name'],
-              datetime: data[i]['createdAt'],
-              mediaType: data[i]['mediaType'],
-              message: data[i]['text'],
-              path: data[i]['path']));
-        }
+
+    
+      final data = prefs.getString('messages') ?? '';
+      if (data != '') {
+
+        messageslist = json.decode(data)
+          .map((item) => Message.fromJson(item))
+          .toList();
+        // for (int i = 0; i < data.length; i++) {
+        //   messageslist.add(Message(
+        //       username: data[i]['name'],
+        //       datetime: data[i]['createdAt'],
+        //       mediatype: data[i]['mediatype'],
+        //       message: data[i]['message'],
+        //       path: data[i]['path']));
+        // }
         pageno = (messageslist.length / 15)
             .toInt(); //How many pages of messages were loaded
         newmessages = messageslist.length %
@@ -37,9 +42,8 @@ class DataLoad {
         await getMessages();
         pageno++;
       }
-    } catch (e) {
-      throw ("Could not fetch stored chat");
-    }
+    
+    
   }
 
   Future<void> getMessages() async {
@@ -50,10 +54,10 @@ class DataLoad {
         final data = json.decode(response.body) as List<dynamic>;
         for (int i = 0; i < data.length; i++) {
           messageslist.add(Message(
-              userName: data[i]['username'],
+              username: data[i]['username'],
               datetime: data[i]['createdAt'],
-              mediaType: data[i]['mediatype'],
-              message: data[i]['text'],
+              mediatype: data[i]['mediatype'],
+              message: data[i]['message'],
               path: data[i]['path']));
         }
         break;

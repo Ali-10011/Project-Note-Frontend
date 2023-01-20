@@ -169,10 +169,10 @@ class _HomeState extends State<Home> {
                     messageslist.insert(
                         0,
                         Message(
-                            userName: jsonDecode['result']['username'],
+                            username: jsonDecode['result']['username'],
                             datetime: jsonDecode['result']['createdAt'],
-                            mediaType: 'image',
-                            message: jsonDecode['result']['text'],
+                            mediatype: 'image',
+                            message: jsonDecode['result']['message'],
                             path: jsonDecode['result']['path']));
                     newmessages++;
                   });
@@ -238,10 +238,10 @@ class _HomeState extends State<Home> {
               messageslist.insert(
                   0,
                   Message(
-                      userName: jsonDecode['result']['username'],
+                      username: jsonDecode['result']['username'],
                       datetime: jsonDecode['result']['createdAt'],
-                      mediaType: 'text'.toString(),
-                      message: jsonDecode['result']['text'],
+                      mediatype: 'text'.toString(),
+                      message: jsonDecode['result']['message'],
                       path: jsonDecode['result']['path']));
               newmessages++;
               dataLoad.saveMessages();
@@ -305,7 +305,7 @@ class _HomeState extends State<Home> {
                         // String thismessage = formatter.format(FirstdateTime);
                         // String previousmessage = formatter.format(SeconddateTime);
                         // if(FirstdateTime.isBefore(SeconddateTime))
-                        if (messageslist[i].mediaType.compareTo('image') == 0) {
+                        if (messageslist[i].mediatype.compareTo('image') == 0) {
                           return InkWell(
                             onTap: () {
                               Navigator.push(

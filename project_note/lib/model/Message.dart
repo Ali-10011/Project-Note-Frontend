@@ -7,33 +7,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Message {
   //Message Class with Json Encode and Decode Function
-  late String userName;
+  late String username;
   late String datetime;
-  late String mediaType;
+  late String mediatype;
   late String message;
   late String path;
 
   Message(
-      {required this.userName,
+      {required this.username,
       required this.datetime,
-      required this.mediaType,
+      required this.mediatype,
       required this.message,
       required this.path});
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-        userName: json['username'],
+        username: json['username'],
         datetime: json['createdAt'],
-        mediaType: json['mediaType'],
-        message: json['text'],
+        mediatype: json['mediatype'],
+        message: json['message'],
         path: json['path']);
   }
 
   Map<String, dynamic> toJson() => {
-        'name': userName,
+        'username': username,
         'createdAt': datetime,
-        'mediaType': mediaType,
-        'text': message,
+        'mediatype': mediatype,
+        'message': message,
         'path': path
       };
 }
@@ -59,10 +59,10 @@ Future<void> getMoreMessages() async {
       }
       for (int i = 0; i < data.length; i++) {
         messageslist.add(Message(
-            userName: data[i]['username'],
+            username: data[i]['username'],
             datetime: data[i]['createdAt'],
-            mediaType: data[i]['mediatype'],
-            message: data[i]['text'],
+            mediatype: data[i]['mediatype'],
+            message: data[i]['message'],
             path: data[i]['path']));
       }
 
