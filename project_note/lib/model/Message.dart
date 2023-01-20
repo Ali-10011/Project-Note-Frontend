@@ -57,21 +57,8 @@ Future<void> getMoreMessages() async {
       } else {
         pageno++;
       }
-      for (int i = 0; i < data.length; i++) {
-        messageslist.add(Message(
-            username: data[i]['username'],
-            datetime: data[i]['createdAt'],
-            mediatype: data[i]['mediatype'],
-            message: data[i]['message'],
-            path: data[i]['path']));
-      }
-
-      for (int i = 0; i < data.length; i++) {
-        dynamic dateTimeString = data[i]['createdAt'];
-        final dateTime = DateTime.parse(dateTimeString);
-        final DateFormat formatter = DateFormat('yyyy-MM-dd');
-        String formatted = formatter.format(dateTime);
-      }
+       messageslist =
+          json.decode(response.body).map<Message>((message) => Message.fromJson(message)).toList();
       break;
     case 404:
       throw ("Could not Find the Resource");
