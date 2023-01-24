@@ -3,6 +3,7 @@ import 'package:project_note/model/Message.dart';
 import 'package:project_note/model/dataLoad.dart';
 import 'package:project_note/model/firebaseStorage.dart';
 import 'package:project_note/views/errpage.dart';
+import 'package:project_note/services/uploadmessages.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -31,7 +32,21 @@ class _LoadingStateState extends State<LoadingState> {
   @override
   void initState() {
     super.initState();
-    WaitForData();
+
+    UploadMessages();
+    //WaitForData();
+  }
+
+  void UploadMessages() async {
+    try {
+      uploadOfflineMessages();
+    } on Exception catch (e) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ErrPage(statusCode: e.toString()),
+          ));
+    }
   }
 
   @override

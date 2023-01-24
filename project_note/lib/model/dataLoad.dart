@@ -21,15 +21,18 @@ class DataLoad {
 
     final data = prefs.getString('messages') ?? '';
     if (data != '') {
-    //Converts the decoded json string to a 'Message' type Map.
-      messageslist =
-          json.decode(data).map<Message>((message) => Message.fromJson(message)).toList();
-     
+      //Converts the decoded json string to a 'Message' type Map.
+      messageslist = json
+          .decode(data)
+          .map<Message>((message) => Message.fromJson(message))
+          .toList();
+
       pageno = (messageslist.length / 15)
           .toInt(); //How many pages of messages were loaded
       newmessages = messageslist.length %
           15; //How many messages were loaded additional to the pages loaded
     } else {
+      print("I am in here !!!!");
       await getMessages();
       pageno++;
     }
@@ -40,8 +43,10 @@ class DataLoad {
     final response = await http.get(Uri.parse('http://localhost:3000/home'));
     switch (response.statusCode) {
       case 200:
-         messageslist =
-          json.decode(response.body).map<Message>((message) => Message.fromJson(message)).toList();
+        messageslist = json
+            .decode(response.body)
+            .map<Message>((message) => Message.fromJson(message))
+            .toList();
         break;
       case 404:
         throw ("Could not Fetch the resource");

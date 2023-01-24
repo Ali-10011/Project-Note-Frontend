@@ -23,7 +23,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final controller = ScrollController();
   Storage storage = Storage();
-  DataLoad dataLoad = DataLoad();
+  
 
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
@@ -279,6 +279,7 @@ class _HomeState extends State<Home> {
               message: _messagecontroller.value.text.toString(),
               path: '',
               isUploaded: 'false'));
+      _messagecontroller.clear();
       newmessages++;
       dataLoad.saveMessages();
     });
@@ -347,7 +348,7 @@ class _HomeState extends State<Home> {
                                     Icon(
                                         (messageslist[i].isUploaded == 'true')
                                             ? Icons.check
-                                            : Icons.watch_outlined,
+                                            : Icons.lock_clock,
                                         size: 12)
                                   ]),
                                 ),
@@ -382,7 +383,7 @@ class _HomeState extends State<Home> {
                                 Icon(
                                     (messageslist[i].isUploaded == 'true')
                                         ? Icons.check
-                                        : Icons.watch_outlined,
+                                        : Icons.error,
                                     size: 12)
                               ]),
                             ),
@@ -483,7 +484,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               IconButton(
-                  onPressed: sendmessage,
+                  onPressed: sendOfflineMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,
