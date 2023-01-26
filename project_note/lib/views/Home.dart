@@ -192,6 +192,7 @@ class _HomeState extends State<Home> {
                     messageslist.insert(
                         0,
                         Message(
+                            id: jsonDecode['result']['_id'],
                             username: jsonDecode['result']['username'],
                             datetime: jsonDecode['result']['createdAt'],
                             mediatype: 'image',
@@ -259,10 +260,12 @@ class _HomeState extends State<Home> {
         case 200:
           {
             Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+            print(jsonDecode);
             setState(() {
               messageslist.insert(
                   0,
                   Message(
+                      id: jsonDecode['result']['_id'],
                       username: jsonDecode['result']['username'],
                       datetime: jsonDecode['result']['createdAt'],
                       mediatype: 'text',
@@ -272,6 +275,7 @@ class _HomeState extends State<Home> {
               newmessages++;
               dataLoad.saveMessages();
             });
+             print(jsonDecode['result']['_id']);
           }
           break;
         case 404:
@@ -293,10 +297,13 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> sendOfflineMessage() async {
+    var uuid = const Uuid();
+    var newMessageID = uuid.v1();
     setState(() {
       messageslist.insert(
           0,
           Message(
+              id: newMessageID.toString(),
               username:
                   'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
               datetime: DateTime.now().toString(),
@@ -305,6 +312,7 @@ class _HomeState extends State<Home> {
               path: '',
               isUploaded: 'false'));
       _messagecontroller.clear();
+      print(newMessageID.toString());
       newmessages++;
       dataLoad.saveMessages();
     });
@@ -378,17 +386,7 @@ class _HomeState extends State<Home> {
                                   ]),
                                 ),
                               )
-                              // child: Bubble(
-                              //     style: styleMe,
-                              //     child: Container(
-                              //       color: Colors.white,
-                              //       height:
-                              //           MediaQuery.of(context).size.height * 0.45,
-                              //       child: CachedNetworkImage(
-                              //           key: UniqueKey(),
-                              //           imageUrl: messageslist[i].path.toString(),
-                              //           fit: BoxFit.cover),
-                              //     )),
+
                               );
                         } else {
                           return (Bubble(
@@ -413,31 +411,7 @@ class _HomeState extends State<Home> {
                               ]),
                             ),
                           )
-                              // child: Column(
-                              //   crossAxisAlignment: CrossAxisAlignment.end,
-                              //   children: [
-                              //     Text(messageslist[i].message.toString()),
-                              //     Text(
-                              //       clockString,
-                              //       style: const TextStyle(
-                              //           fontWeight: FontWeight.bold,
-                              //           fontSize: 12),
-                              //     ),
-                              //     const Icon(Icons.check, size: 12)
-                              // ListTile(
-                              //   title: Text(
-                              //     clockString,
-                              //     style: const TextStyle(
-                              //         fontWeight: FontWeight.bold,
-                              //         fontSize: 12),
-                              //   ),
-                              //   subtitle: Icon(
-                              //     Icons.check,
-                              //     size: 8,
-                              //   ),
-                              // )
-                              //   ],
-                              // ))
+                            
                               );
                         }
                       } else if (IsLastPage) {
@@ -509,7 +483,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               IconButton(
-                  onPressed: sendmessage,
+                  onPressed: (connection == ConnectionStatus.wifi) ? sendmessage : sendOfflineMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,
