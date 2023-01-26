@@ -33,8 +33,8 @@ class _LoadingStateState extends State<LoadingState> {
   void initState() {
     super.initState();
 
-    UploadMessages();
-    //WaitForData();
+    //UploadMessages();
+    WaitForData();
   }
 
   void UploadMessages() async {

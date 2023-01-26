@@ -12,6 +12,9 @@ import 'package:uuid/uuid.dart';
 import 'package:project_note/services/heroAnimation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:project_note/model/dataLoad.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -23,7 +26,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final controller = ScrollController();
   Storage storage = Storage();
-  
+  var connection;
 
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
@@ -41,6 +44,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    checkConnection();
     controller.addListener(() {
       if (controller.position.maxScrollExtent == controller.offset) {
         if (!(IsLastPage)) {
@@ -72,6 +76,26 @@ class _HomeState extends State<Home> {
         content: Text("Images Reloaded !"),
       ));
     });
+  }
+
+  void checkConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      connection = ConnectionStatus.mobileNetwork;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Connected to a mobile network !"),
+      ));
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      connection = ConnectionStatus.wifi;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Connected to a Wifi !"),
+      ));
+    } else {
+      connection = ConnectionStatus.noConnection;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("No Network Connection Found !"),
+      ));
+    }
   }
 
   void catchError(int statusCode) //can be used to identify errors in the future
@@ -265,6 +289,7 @@ class _HomeState extends State<Home> {
           ));
     }
     _messagecontroller.clear();
+    checkConnection();
   }
 
   Future<void> sendOfflineMessage() async {
@@ -484,7 +509,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               IconButton(
-                  onPressed: sendOfflineMessage,
+                  onPressed: sendmessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,
