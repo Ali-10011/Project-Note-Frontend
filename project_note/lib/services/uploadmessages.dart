@@ -31,6 +31,7 @@ void uploadOfflineMessages() async {
       case 200:
         {
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+          //messageslist.where((message) {message.id == offlineMessage.id}).forEach((message){});
           offlineMessage.datetime = jsonDecode['result']['createdAt'];
           offlineMessage.message = jsonDecode['result']['message'];
           offlineMessage.path = jsonDecode['result']['path'];

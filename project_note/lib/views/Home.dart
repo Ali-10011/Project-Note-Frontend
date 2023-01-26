@@ -14,8 +14,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:project_note/model/dataLoad.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-enum ConnectionStatus { wifi, mobileNetwork, noConnection }
-
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -26,12 +24,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final controller = ScrollController();
   Storage storage = Storage();
-  var connection;
+ 
 
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
     try {
-      if ((connection == ConnectionStatus.wifi) && (IsLastPage == false)) {     
+      if ((connection == ConnectionStatus.wifi) && (IsLastPage == false)) {
         await getMoreMessages();
       }
     } on Exception catch (e) {
@@ -85,17 +83,17 @@ class _HomeState extends State<Home> {
   void checkConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile) {
-      connection = ConnectionStatus.mobileNetwork;
+     // connection = ConnectionStatus.mobileNetwork;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Connected to a mobile network !"),
       ));
     } else if (connectivityResult == ConnectivityResult.wifi) {
-      connection = ConnectionStatus.wifi;
+      //connection = ConnectionStatus.wifi;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Connected to a Wifi !"),
       ));
     } else {
-      connection = ConnectionStatus.noConnection;
+      //connection = ConnectionStatus.noConnection;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("No Network Connection Found !"),
       ));
@@ -221,6 +219,11 @@ class _HomeState extends State<Home> {
             }
           });
         } //print(text);
+        else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Feature under Development!"),
+          ));
+        }
       },
       child: Column(
         children: [
@@ -317,7 +320,6 @@ class _HomeState extends State<Home> {
               isUploaded: 'false'));
       _messagecontroller.clear();
       print(newMessageID.toString());
-      newmessages++;
       dataLoad.saveMessages();
     });
   }

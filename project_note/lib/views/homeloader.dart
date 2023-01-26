@@ -4,6 +4,7 @@ import 'package:project_note/model/dataLoad.dart';
 import 'package:project_note/model/firebaseStorage.dart';
 import 'package:project_note/views/errpage.dart';
 import 'package:project_note/services/uploadmessages.dart';
+import 'package:project_note/globals/globals.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -32,9 +33,12 @@ class _LoadingStateState extends State<LoadingState> {
   @override
   void initState() {
     super.initState();
-
-    //UploadMessages();
-    WaitForData();
+    setConnection();
+    if (!(connection == ConnectionStatus.wifi)) {
+      WaitForData();
+    } else if (connection == ConnectionStatus.wifi) {
+      UploadMessages();
+    }
   }
 
   void UploadMessages() async {
@@ -52,8 +56,12 @@ class _LoadingStateState extends State<LoadingState> {
   @override
   Widget build(BuildContext context) {
     // Storage storage = Storage();
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    return Scaffold(
+      body: Center(
+          child: Column(children: <Widget>[
+        Text("Loading Your Messages, Please Wait..."),
+        CircularProgressIndicator()
+      ])),
     );
   }
 }

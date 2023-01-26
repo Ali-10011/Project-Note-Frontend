@@ -2,12 +2,27 @@ import 'package:project_note/model/Message.dart';
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/model/dataLoad.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 List<Message> messageslist = [];
 bool IsLastPage = false;
 int pageno = 0;
 int newmessages = 0;
 DataLoad dataLoad = DataLoad();
+var connection;
+enum ConnectionStatus { wifi, mobileNetwork, noConnection }
+void setConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile) {
+    connection = ConnectionStatus.mobileNetwork;
+  } else if (connectivityResult == ConnectivityResult.wifi) {
+    connection = ConnectionStatus.wifi;
+  } else {
+    connection = ConnectionStatus.noConnection;
+
+  }
+}
+
 const int LoadPerPage = 15;
 const styleMe = BubbleStyle(
   margin: BubbleEdges.only(top: 10, bottom: 10),

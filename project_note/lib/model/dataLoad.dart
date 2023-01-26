@@ -31,10 +31,10 @@ class DataLoad {
           .toInt(); //How many pages of messages were loaded
       newmessages = messageslist.length %
           15; //How many messages were loaded additional to the pages loaded
-    } else {
-      print("I am in here !!!!");
-      await getMessages();
-      pageno++;
+    } else if (connection == ConnectionStatus.wifi) {   
+        await getMessages();
+        pageno++;
+      
     }
   }
 
