@@ -31,7 +31,9 @@ class _HomeState extends State<Home> {
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
     try {
-      await getMoreMessages();
+      if ((connection == ConnectionStatus.wifi) && (IsLastPage == false)) {     
+        await getMoreMessages();
+      }
     } on Exception catch (e) {
       Navigator.pushReplacement(
           context,
@@ -46,16 +48,18 @@ class _HomeState extends State<Home> {
     super.initState();
     checkConnection();
     controller.addListener(() {
-      if (controller.position.maxScrollExtent == controller.offset) {
-        if (!(IsLastPage)) {
-          try {
-            LoadMore();
-          } on Exception catch (e) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ErrPage(statusCode: e.toString()),
-                ));
+      if ((connection == ConnectionStatus.wifi)) {
+        if (controller.position.maxScrollExtent == controller.offset) {
+          if (!(IsLastPage)) {
+            try {
+              LoadMore();
+            } on Exception catch (e) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ErrPage(statusCode: e.toString()),
+                  ));
+            }
           }
         }
       }
@@ -275,7 +279,7 @@ class _HomeState extends State<Home> {
               newmessages++;
               dataLoad.saveMessages();
             });
-             print(jsonDecode['result']['_id']);
+            print(jsonDecode['result']['_id']);
           }
           break;
         case 404:
@@ -385,9 +389,7 @@ class _HomeState extends State<Home> {
                                         size: 12)
                                   ]),
                                 ),
-                              )
-
-                              );
+                              ));
                         } else {
                           return (Bubble(
                             style: styleMe,
@@ -410,9 +412,7 @@ class _HomeState extends State<Home> {
                                     size: 12)
                               ]),
                             ),
-                          )
-                            
-                              );
+                          ));
                         }
                       } else if (IsLastPage) {
                         return const Padding(
@@ -483,7 +483,9 @@ class _HomeState extends State<Home> {
                 ),
               ),
               IconButton(
-                  onPressed: (connection == ConnectionStatus.wifi) ? sendmessage : sendOfflineMessage,
+                  onPressed: (connection == ConnectionStatus.wifi)
+                      ? sendmessage
+                      : sendOfflineMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,

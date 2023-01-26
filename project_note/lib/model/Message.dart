@@ -15,8 +15,7 @@ class Message {
   late String path;
   late String isUploaded;
   Message(
-      {
-      required this.id,
+      {required this.id,
       required this.username,
       required this.datetime,
       required this.mediatype,
@@ -57,20 +56,22 @@ Future<void> getMoreMessages() async {
     'http://localhost:3000/home?pageno=${pageno.toString()}&skip=${newmessages.toString()}&perpage=${LoadPerPage.toString()}',
   ));
 /**/
-final data = json.decode(response.body) as List<dynamic>;
+  final data = json.decode(response.body) as List<dynamic>;
+  if (data.isEmpty) {
+    IsLastPage = true;
+  }
   if (data.isNotEmpty) {
     switch (response.statusCode) {
       case 200:
-        
         if (data.length < 15) {
           IsLastPage = true;
         } else {
           pageno++;
         }
-        messageslist = json
+        messageslist.addAll(json
             .decode(response.body)
             .map<Message>((message) => Message.fromJson(message))
-            .toList();
+            .toList());
         break;
       case 404:
         throw ("Could not Find the Resource");
