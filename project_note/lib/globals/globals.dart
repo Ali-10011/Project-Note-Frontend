@@ -11,17 +11,7 @@ int newmessages = 0;
 DataLoad dataLoad = DataLoad();
 var connection;
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
-void setConnection() async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.mobile) {
-    connection = ConnectionStatus.mobileNetwork;
-  } else if (connectivityResult == ConnectivityResult.wifi) {
-    connection = ConnectionStatus.wifi;
-  } else {
-    connection = ConnectionStatus.noConnection;
 
-  }
-}
 
 const int LoadPerPage = 15;
 const styleMe = BubbleStyle(

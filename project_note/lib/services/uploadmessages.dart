@@ -4,12 +4,13 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/model/Message.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void uploadOfflineMessages() async {
+Future<void> uploadOfflineMessages() async {
   final prefs = await SharedPreferences.getInstance();
 
   final data = prefs.getString('messages') ?? '';
   if (data != '') {
     //Converts the decoded json string to a 'Message' type Map.
+
     messageslist = json
         .decode(data)
         .map<Message>((message) => Message.fromJson(message))
@@ -32,13 +33,18 @@ void uploadOfflineMessages() async {
         {
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
           //messageslist.where((message) {message.id == offlineMessage.id}).forEach((message){});
-          offlineMessage.datetime = jsonDecode['result']['createdAt'];
-          offlineMessage.message = jsonDecode['result']['message'];
-          offlineMessage.path = jsonDecode['result']['path'];
-          offlineMessage.isUploaded = jsonDecode['result']['isUploaded'];
-          offlineMessage.username = jsonDecode['result']['username'];
-          print(offlineMessage.message);
-          print(offlineMessage.isUploaded);
+          int messageindex = messageslist.indexOf(offlineMessage);
+          messageslist[messageindex].id = jsonDecode['result']['_id'];
+          messageslist[messageindex].datetime =
+              jsonDecode['result']['createdAt'];
+          messageslist[messageindex].message = jsonDecode['result']['message'];
+          messageslist[messageindex].path = jsonDecode['result']['path'];
+          messageslist[messageindex].isUploaded =
+              jsonDecode['result']['isUploaded'];
+          messageslist[messageindex].username =
+              jsonDecode['result']['username'];
+          print(messageslist[messageindex].message);
+          print(messageslist[messageindex].isUploaded);
         }
         break;
       case 404:
@@ -49,5 +55,6 @@ void uploadOfflineMessages() async {
       //print(jsonDecode);
     }
   });
+
   dataLoad.saveMessages();
 }

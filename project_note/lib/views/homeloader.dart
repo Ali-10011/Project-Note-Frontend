@@ -5,6 +5,7 @@ import 'package:project_note/model/firebaseStorage.dart';
 import 'package:project_note/views/errpage.dart';
 import 'package:project_note/services/uploadmessages.dart';
 import 'package:project_note/globals/globals.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class _LoadingStateState extends State<LoadingState> {
   void WaitForData() async {
     try {
       await dataLoad.loadMessages();
+      Navigator.pushReplacementNamed(context, '/home');
     } on Exception catch (e) {
       Navigator.pushReplacement(
           context,
@@ -27,41 +29,58 @@ class _LoadingStateState extends State<LoadingState> {
             builder: (context) => ErrPage(statusCode: e.toString()),
           ));
     }
-    Navigator.pushReplacementNamed(context, '/home');
+  }
+
+  void UploadMessages() async {
+    try {
+      await uploadOfflineMessages();
+       Navigator.pushReplacementNamed(context, '/home');
+    } on Exception catch (e) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ErrPage(statusCode: e.toString()),
+          ));
+    }
+  }
+
+  void setConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      connection = ConnectionStatus.mobileNetwork;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      connection = ConnectionStatus.wifi;
+    } else {
+      connection = ConnectionStatus.noConnection;
+    }
+    if (!(connection == ConnectionStatus.wifi)) {
+      print('We GOT NO WIFI !!!');
+      WaitForData();
+    } else if (connection == ConnectionStatus.wifi) {
+      print('We GOT WIFI !!!');
+      UploadMessages();
+    }
   }
 
   @override
   void initState() {
     super.initState();
     setConnection();
-    if (!(connection == ConnectionStatus.wifi)) {
-      WaitForData();
-    } else if (connection == ConnectionStatus.wifi) {
-      UploadMessages();
-    }
-  }
-
-  void UploadMessages() async {
-    try {
-      uploadOfflineMessages();
-    } on Exception catch (e) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ErrPage(statusCode: e.toString()),
-          ));
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     // Storage storage = Storage();
-    return Scaffold(
-      body: Center(
-          child: Column(children: <Widget>[
-        Text("Loading Your Messages, Please Wait..."),
-        CircularProgressIndicator()
-      ])),
+    return Center(
+      child: Scaffold(
+        body: Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+              Text("Loading Your Messages, Please Wait..."),
+              CircularProgressIndicator()
+            ])),
+      ),
     );
   }
 }
