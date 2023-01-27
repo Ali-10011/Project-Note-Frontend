@@ -7,12 +7,15 @@ import 'package:project_note/globals/globals.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:project_note/model/firebaseStorage.dart';
+import 'package:project_note/providers/messages_providers.dart';
 import 'package:project_note/views/errpage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:project_note/services/heroAnimation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:project_note/model/dataLoad.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:provider/provider.dart';
+import 'package:project_note/providers/messages_providers.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -22,9 +25,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  List<Message> _messageslist = [];
   final controller = ScrollController();
   Storage storage = Storage();
- 
 
   late TextEditingController _messagecontroller = TextEditingController();
   Future<void> LoadMore() async {
@@ -83,7 +86,7 @@ class _HomeState extends State<Home> {
   void checkConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile) {
-     // connection = ConnectionStatus.mobileNetwork;
+      // connection = ConnectionStatus.mobileNetwork;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Connected to a mobile network !"),
       ));
@@ -191,7 +194,7 @@ class _HomeState extends State<Home> {
                 case 200:
                   Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
                   setState(() {
-                    messageslist.insert(
+                    _messageslist.insert(
                         0,
                         Message(
                             id: jsonDecode['result']['_id'],
@@ -269,7 +272,7 @@ class _HomeState extends State<Home> {
             Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
             print(jsonDecode);
             setState(() {
-              messageslist.insert(
+              _messageslist.insert(
                   0,
                   Message(
                       id: jsonDecode['result']['_id'],
@@ -307,7 +310,7 @@ class _HomeState extends State<Home> {
     var uuid = const Uuid();
     var newMessageID = uuid.v1();
     setState(() {
-      messageslist.insert(
+      _messageslist.insert(
           0,
           Message(
               id: newMessageID.toString(),
@@ -325,6 +328,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget build(BuildContext context) {
+    _messageslist = context.watch<MessageProvider>().messages;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -344,26 +348,26 @@ class _HomeState extends State<Home> {
       body: CustomScrollView(controller: controller, reverse: true, slivers: [
         SliverToBoxAdapter(
           child: Container(
-            child: (messageslist.isEmpty)
+            child: (_messageslist.isEmpty)
                 ? const Center(child: Text('Start Typing.... '))
                 : ListView.builder(
                     reverse: true,
                     shrinkWrap: true,
                     physics: const ClampingScrollPhysics(),
-                    itemCount: messageslist.length + 1,
+                    itemCount: _messageslist.length + 1,
                     itemBuilder: (context, i) {
-                      if (i < messageslist.length) {
+                      if (i < _messageslist.length) {
                         final format = DateFormat("h:mma");
                         final clockString = format
-                            .format(DateTime.parse(messageslist[i].datetime));
-                        if (messageslist[i].mediatype.compareTo('image') == 0) {
+                            .format(DateTime.parse(_messageslist[i].datetime));
+                        if (_messageslist[i].mediatype.compareTo('image') == 0) {
                           return InkWell(
                               onTap: () {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => PhotoHero(
-                                        photo: messageslist[i].path.toString(),
+                                        photo: _messageslist[i].path.toString(),
                                       ),
                                     ));
                               },
@@ -374,7 +378,7 @@ class _HomeState extends State<Home> {
                                       EdgeInsets.only(left: 0.0, right: 0.0),
                                   title: CachedNetworkImage(
                                       key: UniqueKey(),
-                                      imageUrl: messageslist[i].path.toString(),
+                                      imageUrl: _messageslist[i].path.toString(),
                                       fit: BoxFit.cover),
                                   subtitle: Row(children: <Widget>[
                                     Text(
@@ -385,7 +389,7 @@ class _HomeState extends State<Home> {
                                     ),
                                     SizedBox(width: 10),
                                     Icon(
-                                        (messageslist[i].isUploaded == 'true')
+                                        (_messageslist[i].isUploaded == 'true')
                                             ? Icons.check
                                             : Icons.lock_clock,
                                         size: 12)
@@ -398,7 +402,7 @@ class _HomeState extends State<Home> {
                             child: ListTile(
                               contentPadding:
                                   EdgeInsets.only(left: 0.0, right: 0.0),
-                              title: Text(messageslist[i].message.toString()),
+                              title: Text(_messageslist[i].message.toString()),
                               subtitle: Row(children: <Widget>[
                                 Text(
                                   clockString,
@@ -408,23 +412,20 @@ class _HomeState extends State<Home> {
                                 ),
                                 SizedBox(width: 10),
                                 Icon(
-                                    (messageslist[i].isUploaded == 'true')
+                                    (_messageslist[i].isUploaded == 'true')
                                         ? Icons.check
                                         : Icons.error,
                                     size: 12)
                               ]),
                             ),
-                          )
-                          
-                          );
-                           
+                          ));
                         }
                       } else if (IsLastPage) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: Center(child: Text("All messages Loaded !")),
                         );
-                      } else if (messageslist.length < LoadPerPage) {
+                      } else if (_messageslist.length < LoadPerPage) {
                         // do nothing
                         return const Padding(
                           padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
@@ -439,7 +440,6 @@ class _HomeState extends State<Home> {
                           child: Center(child: CircularProgressIndicator()),
                         );
                       }
-                     
                     }),
           ),
         ),
@@ -489,9 +489,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               IconButton(
-                  onPressed: (connection == ConnectionStatus.wifi)
-                      ? sendmessage
-                      : sendOfflineMessage,
+                  onPressed: sendOfflineMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,

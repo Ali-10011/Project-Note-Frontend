@@ -46,6 +46,7 @@ dependencies:
   cached_network_image:
   shared_preferences: 
   connectivity_plus:
+  provider:
 
 dev_dependencies:
   flutter_test:

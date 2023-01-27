@@ -6,6 +6,8 @@ import 'package:project_note/views/errpage.dart';
 import 'package:project_note/services/uploadmessages.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:provider/provider.dart';
+import 'package:project_note/providers/messages_providers.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -33,8 +35,11 @@ class _LoadingStateState extends State<LoadingState> {
 
   void UploadMessages() async {
     try {
-      await uploadOfflineMessages();
-       Navigator.pushReplacementNamed(context, '/home');
+      print("Providers no work");
+     await Provider.of<MessageProvider>(context, listen: false)
+          .uploadOfflineMessages();
+
+      Navigator.pushReplacementNamed(context, '/home');
     } on Exception catch (e) {
       Navigator.pushReplacement(
           context,

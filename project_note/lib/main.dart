@@ -6,13 +6,15 @@ import 'package:project_note/views/Home.dart';
 import 'package:project_note/views/errpage.dart';
 import 'package:project_note/views/homeloader.dart';
 import 'firebase_options.dart';
+import 'package:provider/provider.dart';
+import 'package:project_note/providers/messages_providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [ChangeNotifierProvider(create: (_) => MessageProvider())] ,child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
