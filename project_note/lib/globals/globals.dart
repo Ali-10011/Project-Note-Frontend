@@ -1,14 +1,12 @@
-import 'package:project_note/model/Message.dart';
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:project_note/model/dataLoad.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
-List<Message> messageslist = [];
+
+//List<Message> messageslist = [];
 bool IsLastPage = false;
 int pageno = 0;
 int newmessages = 0;
-DataLoad dataLoad = DataLoad();
+//DataLoad dataLoad = DataLoad();
 var connection;
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 

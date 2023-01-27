@@ -12,10 +12,8 @@ import 'package:project_note/views/errpage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:project_note/services/heroAnimation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:project_note/model/dataLoad.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/providers/messages_providers.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -33,7 +31,7 @@ class _HomeState extends State<Home> {
   Future<void> LoadMore() async {
     try {
       if ((connection == ConnectionStatus.wifi) && (IsLastPage == false)) {
-        await getMoreMessages();
+        Provider.of<MessageProvider>(context, listen: false).getMessages();
       }
     } on Exception catch (e) {
       Navigator.pushReplacement(
@@ -205,7 +203,8 @@ class _HomeState extends State<Home> {
                             path: jsonDecode['result']['path'],
                             isUploaded: jsonDecode['result']['isUploaded']));
                     newmessages++;
-                    dataLoad.saveMessages();
+                   Provider.of<MessageProvider>(context, listen: false)
+                        .saveMessages();
                   });
                   break;
                 case 404:
@@ -283,7 +282,8 @@ class _HomeState extends State<Home> {
                       path: jsonDecode['result']['path'],
                       isUploaded: jsonDecode['result']['isUploaded']));
               newmessages++;
-              dataLoad.saveMessages();
+              Provider.of<MessageProvider>(context, listen: false)
+                  .saveMessages();
             });
             print(jsonDecode['result']['_id']);
           }
@@ -323,7 +323,7 @@ class _HomeState extends State<Home> {
               isUploaded: 'false'));
       _messagecontroller.clear();
       print(newMessageID.toString());
-      dataLoad.saveMessages();
+      Provider.of<MessageProvider>(context, listen: false).saveMessages();
     });
   }
 

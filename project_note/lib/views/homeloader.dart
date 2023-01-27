@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_note/model/Message.dart';
-import 'package:project_note/model/dataLoad.dart';
-import 'package:project_note/model/firebaseStorage.dart';
 import 'package:project_note/views/errpage.dart';
-import 'package:project_note/services/uploadmessages.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
@@ -17,12 +13,11 @@ class LoadingState extends StatefulWidget {
 }
 
 class _LoadingStateState extends State<LoadingState> {
-  DataLoad dataLoad = DataLoad();
   //Storage storage = Storage();
 
   void WaitForData() async {
     try {
-      await dataLoad.loadMessages();
+      await Provider.of<MessageProvider>(context, listen: false).loadMessages();
       Navigator.pushReplacementNamed(context, '/home');
     } on Exception catch (e) {
       Navigator.pushReplacement(
@@ -35,8 +30,7 @@ class _LoadingStateState extends State<LoadingState> {
 
   void UploadMessages() async {
     try {
-      print("Providers no work");
-     await Provider.of<MessageProvider>(context, listen: false)
+      await Provider.of<MessageProvider>(context, listen: false)
           .uploadOfflineMessages();
 
       Navigator.pushReplacementNamed(context, '/home');
