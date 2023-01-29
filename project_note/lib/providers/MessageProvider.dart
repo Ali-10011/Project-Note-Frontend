@@ -14,8 +14,15 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> uploadOfflineMessages() async {
-    loadMessages();
-    if (messageslist.isNotEmpty) {
+    final prefs = await SharedPreferences.getInstance();
+
+    final data = prefs.getString('messages') ?? '';
+    if (data != '') {
+      //Converts the decoded json string to a 'Message' type Map.
+      messageslist = json
+          .decode(data)
+          .map<Message>((message) => Message.fromJson(message))
+          .toList();
       messageslist
           .where((message) => (message.isUploaded == "false"))
           .forEach((offlineMessage) async {
@@ -44,6 +51,9 @@ class MessageProvider with ChangeNotifier {
             throw (response.statusCode.toString());
         }
       });
+    } else if (connection == ConnectionStatus.wifi) {
+      await getMessages();
+      pageno++;
     }
   }
 
@@ -130,7 +140,7 @@ class MessageProvider with ChangeNotifier {
     if (data.isEmpty) {
       isLastPage = true;
     }
-    if (data.isNotEmpty) {
+    else if (data.isNotEmpty) {
       switch (response.statusCode) {
         case 200:
           if (data.length < 15) {

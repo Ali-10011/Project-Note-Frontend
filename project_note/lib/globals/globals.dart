@@ -1,11 +1,13 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:project_note/models/FirebaseStorage.dart';
 
 //List<Message> messageslist = [];
 bool isLastPage = false;
 int pageno = 0;
 int newmessages = 0;
 const String API_URL = 'http://localhost:3000/home';
+Storage storage = Storage();
 //DataLoad dataLoad = DataLoad();
 var connection;
 
