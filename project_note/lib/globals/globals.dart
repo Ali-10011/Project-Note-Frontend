@@ -1,17 +1,18 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
 
-
 //List<Message> messageslist = [];
-bool IsLastPage = false;
+bool isLastPage = false;
 int pageno = 0;
 int newmessages = 0;
+const String API_URL = 'http://localhost:3000/home';
 //DataLoad dataLoad = DataLoad();
 var connection;
+
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 
+const int loadPerPage = 15;
 
-const int LoadPerPage = 15;
 const styleMe = BubbleStyle(
   margin: BubbleEdges.only(top: 10, bottom: 10),
   shadowColor: Color.fromARGB(255, 137, 9, 223),

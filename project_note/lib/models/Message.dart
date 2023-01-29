@@ -17,7 +17,7 @@ class Message {
       required this.path,
       required this.isUploaded});
 
-  factory Message.fromJson(Map<String, dynamic> json) {
+  factory Message.fromJson(Map<dynamic, dynamic> json) {
     return Message(
         id: json['_id'],
         username: json['username'],
@@ -28,7 +28,7 @@ class Message {
         isUploaded: json['isUploaded']);
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<dynamic, dynamic> toJson() => {
         '_id': id,
         'username': username,
         'createdAt': datetime,

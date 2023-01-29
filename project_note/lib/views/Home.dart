@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:bubble/bubble.dart';
-import 'package:project_note/model/Message.dart';
+import 'package:project_note/models/Message.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:project_note/model/firebaseStorage.dart';
-import 'package:project_note/providers/messages_providers.dart';
-import 'package:project_note/views/errpage.dart';
+import 'package:project_note/models/FirebaseStorage.dart';
+import 'package:project_note/providers/MessageProvider.dart';
+import 'package:project_note/views/ErrPage.dart';
 import 'package:uuid/uuid.dart';
-import 'package:project_note/services/heroAnimation.dart';
+import 'package:project_note/animations/HeroAnimation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
@@ -27,10 +27,10 @@ class _HomeState extends State<Home> {
   final controller = ScrollController();
   Storage storage = Storage();
 
-  late TextEditingController _messagecontroller = TextEditingController();
-  Future<void> LoadMore() async {
+  late final TextEditingController _messagecontroller = TextEditingController();
+  Future<void> loadMore() async {
     try {
-      if ((connection == ConnectionStatus.wifi) && (IsLastPage == false)) {
+      if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
         Provider.of<MessageProvider>(context, listen: false).getMessages();
       }
     } on Exception catch (e) {
@@ -49,9 +49,9 @@ class _HomeState extends State<Home> {
     controller.addListener(() {
       if ((connection == ConnectionStatus.wifi)) {
         if (controller.position.maxScrollExtent == controller.offset) {
-          if (!(IsLastPage)) {
+          if (!(isLastPage)) {
             try {
-              LoadMore();
+              loadMore();
             } on Exception catch (e) {
               Navigator.pushReplacement(
                   context,
@@ -101,8 +101,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void catchError(int statusCode) //can be used to identify errors in the future
-  {}
   Widget bottomSheet() {
     return Container(
       height: 278,
@@ -179,8 +177,7 @@ class _HomeState extends State<Home> {
               content: Text('Image Sent !'),
             ));
             try {
-              var response = await http
-                  .post(Uri.parse('http://localhost:3000/home'), headers: {
+              var response = await http.post(Uri.parse(API_URL), headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
               }, body: {
                 'message': 'new message',
@@ -203,7 +200,7 @@ class _HomeState extends State<Home> {
                             path: jsonDecode['result']['path'],
                             isUploaded: jsonDecode['result']['isUploaded']));
                     newmessages++;
-                   Provider.of<MessageProvider>(context, listen: false)
+                    Provider.of<MessageProvider>(context, listen: false)
                         .saveMessages();
                   });
                   break;
@@ -256,8 +253,7 @@ class _HomeState extends State<Home> {
 
   Future<void> sendmessage() async {
     try {
-      var response =
-          await http.post(Uri.parse('http://localhost:3000/home'), headers: {
+      var response = await http.post(Uri.parse(API_URL), headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       }, body: {
         'message': _messagecontroller.value.text.toString(),
@@ -307,23 +303,11 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> sendOfflineMessage() async {
-    var uuid = const Uuid();
-    var newMessageID = uuid.v1();
     setState(() {
-      _messageslist.insert(
-          0,
-          Message(
-              id: newMessageID.toString(),
-              username:
-                  'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
-              datetime: DateTime.now().toString(),
-              mediatype: 'text',
-              message: _messagecontroller.value.text.toString(),
-              path: '',
-              isUploaded: 'false'));
+      // print(newMessageID.toString());
+      Provider.of<MessageProvider>(context, listen: false)
+          .addOfflineMessage(_messagecontroller.value.text.toString());
       _messagecontroller.clear();
-      print(newMessageID.toString());
-      Provider.of<MessageProvider>(context, listen: false).saveMessages();
     });
   }
 
@@ -360,7 +344,8 @@ class _HomeState extends State<Home> {
                         final format = DateFormat("h:mma");
                         final clockString = format
                             .format(DateTime.parse(_messageslist[i].datetime));
-                        if (_messageslist[i].mediatype.compareTo('image') == 0) {
+                        if (_messageslist[i].mediatype.compareTo('image') ==
+                            0) {
                           return InkWell(
                               onTap: () {
                                 Navigator.push(
@@ -378,7 +363,8 @@ class _HomeState extends State<Home> {
                                       EdgeInsets.only(left: 0.0, right: 0.0),
                                   title: CachedNetworkImage(
                                       key: UniqueKey(),
-                                      imageUrl: _messageslist[i].path.toString(),
+                                      imageUrl:
+                                          _messageslist[i].path.toString(),
                                       fit: BoxFit.cover),
                                   subtitle: Row(children: <Widget>[
                                     Text(
@@ -420,12 +406,12 @@ class _HomeState extends State<Home> {
                             ),
                           ));
                         }
-                      } else if (IsLastPage) {
+                      } else if (isLastPage) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: Center(child: Text("All messages Loaded !")),
                         );
-                      } else if (_messageslist.length < LoadPerPage) {
+                      } else if (_messageslist.length < loadPerPage) {
                         // do nothing
                         return const Padding(
                           padding: EdgeInsets.fromLTRB(150, 10, 150, 10),

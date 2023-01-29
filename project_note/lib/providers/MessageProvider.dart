@@ -1,11 +1,10 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:project_note/model/Message.dart';
+import 'package:project_note/models/Message.dart';
 import 'package:project_note/globals/globals.dart';
+import 'package:uuid/uuid.dart';
 
 class MessageProvider with ChangeNotifier {
   List<Message> messageslist = [];
@@ -15,21 +14,13 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> uploadOfflineMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final data = prefs.getString('messages') ?? '';
-
-    if (data != '') {
-      messageslist = json
-          .decode(data)
-          .map<Message>((message) => Message.fromJson(message))
-          .toList();
-
+    loadMessages();
+    if (messageslist.isNotEmpty) {
       messageslist
           .where((message) => (message.isUploaded == "false"))
           .forEach((offlineMessage) async {
         var response =
-            await http.post(Uri.parse('http://localhost:3000/home'), headers: {
+            await http.post(Uri.parse(API_URL), headers: {
           "Content-Type": "application/x-www-form-urlencoded"
         }, body: {
           'message': offlineMessage.message,
@@ -41,34 +32,18 @@ class MessageProvider with ChangeNotifier {
           case 200:
             {
               Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-              //messageslist.where((message) {message.id == offlineMessage.id}).forEach((message){});
               int messageindex = messageslist.indexOf(offlineMessage);
-              messageslist[messageindex].id = jsonDecode['result']['_id'];
-              messageslist[messageindex].datetime =
-                  jsonDecode['result']['createdAt'];
-              messageslist[messageindex].message =
-                  jsonDecode['result']['message'];
-              messageslist[messageindex].path = jsonDecode['result']['path'];
-              messageslist[messageindex].isUploaded =
-                  jsonDecode['result']['isUploaded'];
-              messageslist[messageindex].username =
-                  jsonDecode['result']['username'];
-              notifyListeners();
-              print(messageslist[messageindex].message);
-              print(messageslist[messageindex].isUploaded);
+              messageslist[messageindex] =
+                  Message.fromJson(jsonDecode['result']);
+              saveMessages();
             }
             break;
           case 404:
             throw ("Cannot Find The Requested Resource");
           default:
             throw (response.statusCode.toString());
-
-          //print(jsonDecode);
         }
       });
-      //notifyListeners();
-      //dataLoad.saveMessages();
-      notifyListeners();
     }
   }
 
@@ -78,6 +53,25 @@ class MessageProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('messages',
         json.encode(messageslist)); //easy way to store dynamic objects
+    notifyListeners();
+  }
+
+  void addOfflineMessage(String messageText) {
+    var uuid = const Uuid();
+    var newMessageID = uuid.v1();
+    messageslist.insert(
+        0,
+        Message(
+            id: newMessageID.toString(),
+            username:
+                'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+            datetime: DateTime.now().toString(),
+            mediatype: 'text',
+            message: messageText,
+            path: '',
+            isUploaded: 'false'));
+
+    saveMessages();
     notifyListeners();
   }
 
@@ -106,7 +100,7 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> getMessages() async {
     //Getting new messages from API
-    final response = await http.get(Uri.parse('http://localhost:3000/home'));
+    final response = await http.get(Uri.parse(API_URL));
     switch (response.statusCode) {
       case 200:
         messageslist = json
@@ -129,18 +123,18 @@ class MessageProvider with ChangeNotifier {
     };
     var url = Uri.https('localhost:3000', '/api/', queryparams);
     final response = await http.get(Uri.parse(
-      'http://localhost:3000/home?pageno=${pageno.toString()}&skip=${newmessages.toString()}&perpage=${LoadPerPage.toString()}',
+      '$API_URL?pageno=${pageno.toString()}&skip=${newmessages.toString()}&perpage=${loadPerPage.toString()}',
     ));
 /**/
     final data = json.decode(response.body) as List<dynamic>;
     if (data.isEmpty) {
-      IsLastPage = true;
+      isLastPage = true;
     }
     if (data.isNotEmpty) {
       switch (response.statusCode) {
         case 200:
           if (data.length < 15) {
-            IsLastPage = true;
+            isLastPage = true;
           } else {
             pageno++;
           }

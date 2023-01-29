@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:project_note/views/errpage.dart';
+import 'package:project_note/views/ErrPage.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/providers/messages_providers.dart';
+import 'package:project_note/providers/MessageProvider.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -15,7 +15,7 @@ class LoadingState extends StatefulWidget {
 class _LoadingStateState extends State<LoadingState> {
   //Storage storage = Storage();
 
-  void WaitForData() async {
+  void waitForData() async {
     try {
       await Provider.of<MessageProvider>(context, listen: false).loadMessages();
       Navigator.pushReplacementNamed(context, '/home');
@@ -28,7 +28,7 @@ class _LoadingStateState extends State<LoadingState> {
     }
   }
 
-  void UploadMessages() async {
+  void uploadMessages() async {
     try {
       await Provider.of<MessageProvider>(context, listen: false)
           .uploadOfflineMessages();
@@ -54,10 +54,10 @@ class _LoadingStateState extends State<LoadingState> {
     }
     if (!(connection == ConnectionStatus.wifi)) {
       print('We GOT NO WIFI !!!');
-      WaitForData();
+      waitForData();
     } else if (connection == ConnectionStatus.wifi) {
       print('We GOT WIFI !!!');
-      UploadMessages();
+      uploadMessages();
     }
   }
 

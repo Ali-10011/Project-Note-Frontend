@@ -2,11 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/views/Authentication.dart';
 import 'package:project_note/views/Home.dart';
-import 'package:project_note/views/errpage.dart';
-import 'package:project_note/views/homeloader.dart';
+import 'package:project_note/views/ErrPage.dart';
+import 'package:project_note/views/HomeLoader.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/providers/messages_providers.dart';
+import 'package:project_note/providers/MessageProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       title: 'Note',
       initialRoute: '/initial',
       routes: {
-        '/Auth': (context) => Auth(),
+        '/auth': (context) => Auth(),
         '/home': (context) => Home(),
         '/initial': (context) => LoadingState(),
         '/err': (context) => ErrPage(),
