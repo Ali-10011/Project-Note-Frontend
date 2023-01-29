@@ -68,12 +68,16 @@ class _BottomBarState extends State<BottomBar> {
   }
 
   Future<void> sendOfflineMessage() async {
-    setState(() {
-      // print(newMessageID.toString());
+
       Provider.of<MessageProvider>(context, listen: false)
           .addOfflineMessage(_messagecontroller.value.text.toString());
       _messagecontroller.clear();
-    });
+   
+  }
+   Future<void> sendOnlineMessage() async {
+    Provider.of<MessageProvider>(context, listen: false)
+        .sendMessage(_messagecontroller.value.text.toString());
+    _messagecontroller.clear();
   }
 
   Widget iconCreation(IconData icons, Color color, String text) {
@@ -223,7 +227,7 @@ class _BottomBarState extends State<BottomBar> {
                 ),
               ),
               IconButton(
-                  onPressed: sendOfflineMessage,
+                  onPressed: sendOnlineMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,

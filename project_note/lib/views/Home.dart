@@ -8,7 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:project_note/providers/MessageProvider.dart';
 import 'package:project_note/views/ErrPage.dart';
 import 'package:project_note/animations/HeroAnimation.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:project_note/widgets/image_tile.dart';
+import 'package:project_note/widgets/message_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/widgets/BottomBar.dart';
 
@@ -76,58 +77,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-
-  Future<void> sendmessage() async {
-    try {
-      var response = await http.post(Uri.parse(API_URL), headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }, body: {
-        'message': _messagecontroller.value.text.toString(),
-        'path': '',
-        'mediatype': 'text'
-      });
-
-      switch (response.statusCode) {
-        case 200:
-          {
-            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-            print(jsonDecode);
-            setState(() {
-              _messageslist.insert(
-                  0,
-                  Message(
-                      id: jsonDecode['result']['_id'],
-                      username: jsonDecode['result']['username'],
-                      datetime: jsonDecode['result']['createdAt'],
-                      mediatype: 'text',
-                      message: jsonDecode['result']['message'],
-                      path: jsonDecode['result']['path'],
-                      isUploaded: jsonDecode['result']['isUploaded']));
-              newmessages++;
-              Provider.of<MessageProvider>(context, listen: false)
-                  .saveMessages();
-            });
-            print(jsonDecode['result']['_id']);
-          }
-          break;
-        case 404:
-          throw ("Cannot Find The Requested Resource");
-        default:
-          throw (response.statusCode.toString());
-
-        //print(jsonDecode);
-      }
-    } catch (e) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ErrPage(statusCode: e.toString()),
-          ));
-    }
-    _messagecontroller.clear();
-  }
-
-
+  @override
   Widget build(BuildContext context) {
     _messageslist = context.watch<MessageProvider>().messages;
     return Scaffold(
@@ -158,9 +108,6 @@ class _HomeState extends State<Home> {
                     itemCount: _messageslist.length + 1,
                     itemBuilder: (context, i) {
                       if (i < _messageslist.length) {
-                        final format = DateFormat("h:mma");
-                        final clockString = format
-                            .format(DateTime.parse(_messageslist[i].datetime));
                         if (_messageslist[i].mediatype.compareTo('image') ==
                             0) {
                           return InkWell(
@@ -173,63 +120,11 @@ class _HomeState extends State<Home> {
                                       ),
                                     ));
                               },
-                              child: Bubble(
-                                style: styleMe,
-                                child: ListTile(
-                                  contentPadding:
-                                      EdgeInsets.only(left: 0.0, right: 0.0),
-                                  title: CachedNetworkImage(
-                                      key: UniqueKey(),
-                                      imageUrl:
-                                          _messageslist[i].path.toString(),
-                                      fit: BoxFit.cover),
-                                  subtitle: Row(children: <Widget>[
-                                    Text(
-                                      clockString,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12),
-                                    ),
-                                    SizedBox(width: 10),
-                                    Icon(
-                                        (_messageslist[i].isUploaded == 'true')
-                                            ? Icons.check
-                                            : Icons.lock_clock,
-                                        size: 12)
-                                  ]),
-                                ),
-                              ));
+                              child: imageTile(_messageslist[i]));
                         } else {
-                          return (Bubble(
-                            style: styleMe,
-                            child: ListTile(
-                              contentPadding:
-                                  EdgeInsets.only(left: 0.0, right: 0.0),
-                              title: Text(_messageslist[i].message.toString()),
-                              subtitle: Row(children: <Widget>[
-                                Text(
-                                  clockString,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                                SizedBox(width: 10),
-                                Icon(
-                                    (_messageslist[i].isUploaded == 'true')
-                                        ? Icons.check
-                                        : Icons.error,
-                                    size: 12)
-                              ]),
-                            ),
-                          ));
+                          return (messageTile(_messageslist[i]));
                         }
                       } else if (isLastPage) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Center(child: Text("All messages Loaded !")),
-                        );
-                      } else if (_messageslist.length < loadPerPage) {
-                        // do nothing
                         return const Padding(
                           padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
                           child: Divider(

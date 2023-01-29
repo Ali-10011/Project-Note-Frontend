@@ -26,8 +26,7 @@ class MessageProvider with ChangeNotifier {
       messageslist
           .where((message) => (message.isUploaded == "false"))
           .forEach((offlineMessage) async {
-        var response =
-            await http.post(Uri.parse(API_URL), headers: {
+        var response = await http.post(Uri.parse(API_URL), headers: {
           "Content-Type": "application/x-www-form-urlencoded"
         }, body: {
           'message': offlineMessage.message,
@@ -57,6 +56,28 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
+  Future<void> sendMessage(String messageEntry) async {
+   addOfflineMessage(messageEntry);
+    var response = await http.post(Uri.parse(API_URL),
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {'message': messageEntry, 'path': '', 'mediatype': 'text'});
+    switch (response.statusCode) {
+      case 200:
+        {
+          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+          messageslist[0] = Message.fromJson(jsonDecode['result']);
+          saveMessages();
+        }
+        break;
+      case 404:
+        throw ("Cannot Find The Requested Resource");
+      default:
+        throw (response.statusCode.toString());
+
+      //print(jsonDecode);
+    }
+  }
+
   void saveMessages() async {
     //Save messages to mobile storage
 
@@ -80,9 +101,9 @@ class MessageProvider with ChangeNotifier {
             message: messageText,
             path: '',
             isUploaded: 'false'));
-
     saveMessages();
     notifyListeners();
+
   }
 
   Future<void> loadMessages() async {
@@ -139,8 +160,7 @@ class MessageProvider with ChangeNotifier {
     final data = json.decode(response.body) as List<dynamic>;
     if (data.isEmpty) {
       isLastPage = true;
-    }
-    else if (data.isNotEmpty) {
+    } else if (data.isNotEmpty) {
       switch (response.statusCode) {
         case 200:
           if (data.length < 15) {
