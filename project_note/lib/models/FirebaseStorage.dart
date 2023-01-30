@@ -9,7 +9,7 @@ class Storage {
           bucket: "gs://project-note-bca4a.appspot.com");
 
   Future<String> uploadfile(String filePath, String fileName) async {
-    final imageref = storage.ref('Images/${fileName}');
+    final imageref = storage.ref('Images/$fileName');
     File file = File(filePath);
 
     try {
@@ -17,19 +17,18 @@ class Storage {
       String url = await imageref.getDownloadURL();
       return url;
     } on firebase_core.FirebaseException catch (e) {
-      print(e);
-      throw Exception('Firebase Error: ${e}');
+      throw Exception('Firebase Error: $e');
     }
   }
 
   Future<String> downloadURL(String imageName) async {
     try {
       String downloadURL =
-          await storage.ref('Images/${imageName}').getDownloadURL();
+          await storage.ref('Images/$imageName').getDownloadURL();
       return downloadURL;
     } on firebase_core.FirebaseException catch (e) {
       print(e);
-      throw Exception('Firebase Error: ${e}');
+      throw Exception('Firebase Error: $e');
     }
   }
 }

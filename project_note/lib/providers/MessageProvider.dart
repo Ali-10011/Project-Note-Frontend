@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -26,29 +27,10 @@ class MessageProvider with ChangeNotifier {
       messageslist
           .where((message) => (message.isUploaded == "false"))
           .forEach((offlineMessage) async {
-        var response = await http.post(Uri.parse(API_URL), headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }, body: {
-          'message': offlineMessage.message,
-          'path': offlineMessage.path,
-          'mediatype': offlineMessage.mediatype
-        });
-
-        switch (response.statusCode) {
-          case 200:
-            {
-              Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-              int messageindex = messageslist.indexOf(offlineMessage);
-              messageslist[messageindex] =
-                  Message.fromJson(jsonDecode['result']);
-
-              saveMessages();
-            }
-            break;
-          case 404:
-            throw ("Cannot Find The Requested Resource");
-          default:
-            throw (response.statusCode.toString());
+        if (offlineMessage.mediatype == 'text') {
+          uploadText(offlineMessage);
+        } else {
+          uploadImage(offlineMessage);
         }
       });
     } else if (connection == ConnectionStatus.wifi) {
@@ -56,8 +38,62 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
+  void uploadText(Message messageInstance) async {
+    var response = await http.post(Uri.parse(API_URL), headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }, body: {
+      'message': messageInstance.message,
+      'path': messageInstance.path,
+      'mediatype': messageInstance.mediatype
+    });
+
+    switch (response.statusCode) {
+      case 200:
+        {
+          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+          int messageindex = messageslist.indexOf(messageInstance);
+          messageslist[messageindex] = Message.fromJson(jsonDecode['result']);
+
+          saveMessages();
+        }
+        break;
+      case 404:
+        throw ("Cannot Find The Requested Resource");
+      default:
+        throw (response.statusCode.toString());
+    }
+  }
+
+  void uploadImage(Message messageInstance) {
+    storage
+        .uploadfile(messageInstance.path, messageInstance.id)
+        .then((value) async {
+      var response = await http.post(Uri.parse(API_URL), headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }, body: {
+        'message': 'new message',
+        'path': value,
+        'mediatype': 'image'
+      });
+
+      switch (response.statusCode) {
+        case 200:
+          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+          int messageIndex = messageslist.indexOf(messageInstance);
+          messageslist[messageIndex] = Message.fromJson(jsonDecode['result']);
+          saveMessages();
+          break;
+        case 404:
+          throw ("Cannot Find The Requested Resource");
+        default:
+          throw (response.statusCode.toString());
+      }
+    });
+  }
+
   Future<void> sendMessage(String messageEntry) async {
-   addOfflineMessage(messageEntry);
+    addOfflineMessage(messageEntry);
+    
     var response = await http.post(Uri.parse(API_URL),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {'message': messageEntry, 'path': '', 'mediatype': 'text'});
@@ -73,8 +109,6 @@ class MessageProvider with ChangeNotifier {
         throw ("Cannot Find The Requested Resource");
       default:
         throw (response.statusCode.toString());
-
-      //print(jsonDecode);
     }
   }
 
@@ -90,6 +124,7 @@ class MessageProvider with ChangeNotifier {
   void addOfflineMessage(String messageText) {
     var uuid = const Uuid();
     var newMessageID = uuid.v1();
+
     messageslist.insert(
         0,
         Message(
@@ -103,7 +138,6 @@ class MessageProvider with ChangeNotifier {
             isUploaded: 'false'));
     saveMessages();
     notifyListeners();
-
   }
 
   Future<void> loadMessages() async {
@@ -125,7 +159,7 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> getMessages() async {
     //Getting new messages from API
-   
+
     final response = await http.get(Uri.parse(
       '$API_URL?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
     ));
@@ -138,7 +172,7 @@ class MessageProvider with ChangeNotifier {
         case 200:
           if (data.length < 15) {
             isLastPage = true;
-          } 
+          }
           messageslist.addAll(json
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))
@@ -151,7 +185,36 @@ class MessageProvider with ChangeNotifier {
       }
     }
     notifyListeners();
-  
   }
 
+  Future<void> sendImage() async {
+    var uuid = const Uuid();
+    var newfilename = uuid.v1();
+
+    final results = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: ['png', 'jpg']);
+    if (results == null) {
+      return null;
+    }
+
+    final path = results.files.single.path;
+
+    Message newInstance = Message(
+        id: newfilename.toString(),
+        username:
+            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+        datetime: DateTime.now().toString(),
+        mediatype: 'image',
+        message: 'new message',
+        path: path.toString(),
+        isUploaded: 'false');
+
+    print("This issss $path path");
+
+    messageslist.insert(0, newInstance);
+    saveMessages();
+    uploadImage(newInstance);
+  }
 }

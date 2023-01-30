@@ -1,19 +1,28 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
 import 'package:intl/intl.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/Message.dart';
 
-
-Widget imageTile (Message messageEntry )
-{
-final format = DateFormat("h:mma");
-final clockString = format.format(DateTime.parse(messageEntry.datetime));
+Widget imageTile(Message messageEntry) {
+  final format = DateFormat("h:mma");
+  final clockString = format.format(DateTime.parse(messageEntry.datetime));
   return Bubble(
     style: styleMe,
     child: ListTile(
       contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0),
-      title: Text(messageEntry.message),
+      title: Container(
+          color: Colors.white,
+          height: screenHeight * 0.45,
+          child: (messageEntry.isUploaded == 'true')
+              ? CachedNetworkImage(
+                  key: UniqueKey(),
+                  imageUrl: messageEntry.path.toString(),
+                  fit: BoxFit.cover)
+              : Image.file(File(messageEntry.path), fit: BoxFit.cover)),
       subtitle: Row(children: <Widget>[
         Text(
           clockString,

@@ -115,7 +115,7 @@ class _HomeState extends State<Home> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => PhotoHero(
-                                        photo: _messageslist[i].path.toString(),
+                                        messageEntry: _messageslist[i],
                                       ),
                                     ));
                               },

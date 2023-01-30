@@ -68,13 +68,12 @@ class _BottomBarState extends State<BottomBar> {
   }
 
   Future<void> sendOfflineMessage() async {
-
-      Provider.of<MessageProvider>(context, listen: false)
-          .addOfflineMessage(_messagecontroller.value.text.toString());
-      _messagecontroller.clear();
-   
+    Provider.of<MessageProvider>(context, listen: false)
+        .addOfflineMessage(_messagecontroller.value.text.toString());
+    _messagecontroller.clear();
   }
-   Future<void> sendOnlineMessage() async {
+
+  Future<void> sendOnlineMessage() async {
     Provider.of<MessageProvider>(context, listen: false)
         .sendMessage(_messagecontroller.value.text.toString());
     _messagecontroller.clear();
@@ -83,71 +82,18 @@ class _BottomBarState extends State<BottomBar> {
   Widget iconCreation(IconData icons, Color color, String text) {
     return InkWell(
       onTap: () async {
-        var uuid = const Uuid();
-        var newfilename = uuid.v1();
         Navigator.pop(context);
         if (text == 'Gallery') {
-          final results = await FilePicker.platform.pickFiles(
-              allowMultiple: false,
-              type: FileType.custom,
-              allowedExtensions: ['png', 'jpg']);
-          if (results == null) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('No File Was Selected.'),
-            ));
-            return null;
+          try {
+            Provider.of<MessageProvider>(context, listen: false).sendImage();
+          } on Exception catch (e) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ErrPage(statusCode: e.toString()),
+                ));
           }
-
-          final path = results.files.single.path;
-          final fileName = results.files.single.name;
-
-          storage.uploadfile(path!, newfilename).then((value) async {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Image Sent !'),
-            ));
-            try {
-              var response = await http.post(Uri.parse(API_URL), headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-              }, body: {
-                'message': 'new message',
-                'path': value,
-                'mediatype': 'image'
-              });
-
-              switch (response.statusCode) {
-                case 200:
-                  Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-                  setState(() {
-                    // messageslist.insert(
-                    //     0,
-                    //     Message(
-                    //         id: jsonDecode['result']['_id'],
-                    //         username: jsonDecode['result']['username'],
-                    //         datetime: jsonDecode['result']['createdAt'],
-                    //         mediatype: 'image',
-                    //         message: jsonDecode['result']['message'],
-                    //         path: jsonDecode['result']['path'],
-                    //         isUploaded: jsonDecode['result']['isUploaded']));
-                    // newmessages++;
-                    // Provider.of<MessageProvider>(context, listen: false)
-                    //     .saveMessages();
-                  });
-                  break;
-                case 404:
-                  throw ("Cannot Find The Requested Resource");
-                default:
-                  throw (response.statusCode.toString());
-              }
-            } catch (e) {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ErrPage(statusCode: e.toString()),
-                  ));
-            }
-          });
-        } //print(text);
-        else {
+        } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Feature under Development!"),
           ));
@@ -227,7 +173,7 @@ class _BottomBarState extends State<BottomBar> {
                 ),
               ),
               IconButton(
-                  onPressed: sendOnlineMessage,
+                  onPressed: sendOfflineMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,

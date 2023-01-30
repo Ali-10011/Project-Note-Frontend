@@ -64,18 +64,22 @@ class _LoadingStateState extends State<LoadingState> {
   @override
   void initState() {
     super.initState();
+
     setConnection();
   }
 
   @override
   Widget build(BuildContext context) {
     // Storage storage = Storage();
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+    
     return Center(
       child: Scaffold(
         body: Center(
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
+                children: const <Widget>[
               Text("Loading Your Messages, Please Wait..."),
               CircularProgressIndicator()
             ])),

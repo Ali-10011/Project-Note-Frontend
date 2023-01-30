@@ -8,10 +8,11 @@ const int loadPerPage = 15;
 
 const String API_URL = 'http://localhost:3000/home';
 Storage storage = Storage();
-//DataLoad dataLoad = DataLoad();
 var connection;
-
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
+
+double screenWidth = 0;
+double screenHeight= 0;
 
 const styleMe = BubbleStyle(
   margin: BubbleEdges.only(top: 10, bottom: 10),
