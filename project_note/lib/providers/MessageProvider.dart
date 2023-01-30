@@ -15,15 +15,10 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> uploadOfflineMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final data = prefs.getString('messages') ?? '';
-    if (data != '') {
-      //Converts the decoded json string to a 'Message' type Map.
-      messageslist = json
-          .decode(data)
-          .map<Message>((message) => Message.fromJson(message))
-          .toList();
+    if (messageslist.isEmpty) {
+      await loadMessages();
+    }
+    if (messageslist.isNotEmpty) {
       messageslist
           .where((message) => (message.isUploaded == "false"))
           .forEach((offlineMessage) async {
@@ -37,6 +32,7 @@ class MessageProvider with ChangeNotifier {
       await getMessages();
     }
   }
+
   Future<void> sendMessage(String messageEntry) async {
     var uuid = const Uuid();
     var newMessageID = uuid.v1();
@@ -55,7 +51,7 @@ class MessageProvider with ChangeNotifier {
       uploadText(newInstance);
     }
   }
-  
+
   void uploadText(Message messageInstance) async {
     var response = await http.post(Uri.parse(API_URL), headers: {
       "Content-Type": "application/x-www-form-urlencoded"
@@ -82,7 +78,7 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-Future<void> sendImage() async {
+  Future<void> sendImage() async {
     var uuid = const Uuid();
     var newfilename = uuid.v1();
 
@@ -142,8 +138,6 @@ Future<void> sendImage() async {
     });
   }
 
-
-
   void saveMessages() async {
     //Save messages to mobile storage
 
@@ -152,7 +146,6 @@ Future<void> sendImage() async {
         json.encode(messageslist)); //easy way to store dynamic objects
     notifyListeners();
   }
-
 
   Future<void> loadMessages() async {
     //Load Messages from mobile storage
@@ -200,6 +193,4 @@ Future<void> sendImage() async {
     }
     notifyListeners();
   }
-
-  
 }

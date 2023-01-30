@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/models/Message.dart';
 import 'package:project_note/globals/globals.dart';
@@ -99,11 +100,21 @@ class _HomeState extends State<Home> {
                   ? Colors.blue
                   : Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
+              var connectivityResult =
+                  await (Connectivity().checkConnectivity());
               setState(() {
-                connection = (connection == ConnectionStatus.wifi)
-                    ? ConnectionStatus.noConnection
-                    : ConnectionStatus.wifi;
+                if (connectivityResult == ConnectivityResult.wifi) {
+                  connection = (connection == ConnectionStatus.wifi)
+                      ? ConnectionStatus.noConnection
+                      : ConnectionStatus.wifi;
+                } else {
+                  connection = ConnectionStatus.noConnection;
+                }
+                if (connection == ConnectionStatus.wifi) {
+                  Provider.of<MessageProvider>(context, listen: false)
+                      .uploadOfflineMessages();
+                }
               });
               // do something
             },
