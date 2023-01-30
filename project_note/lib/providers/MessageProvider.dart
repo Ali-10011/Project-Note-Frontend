@@ -37,7 +37,25 @@ class MessageProvider with ChangeNotifier {
       await getMessages();
     }
   }
-
+  Future<void> sendMessage(String messageEntry) async {
+    var uuid = const Uuid();
+    var newMessageID = uuid.v1();
+    Message newInstance = Message(
+        id: newMessageID.toString(),
+        username:
+            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+        datetime: DateTime.now().toString(),
+        mediatype: 'text',
+        message: messageEntry,
+        path: '',
+        isUploaded: 'false');
+    messageslist.insert(0, newInstance);
+    saveMessages();
+    if (connection == ConnectionStatus.wifi) {
+      uploadText(newInstance);
+    }
+  }
+  
   void uploadText(Message messageInstance) async {
     var response = await http.post(Uri.parse(API_URL), headers: {
       "Content-Type": "application/x-www-form-urlencoded"
@@ -61,6 +79,39 @@ class MessageProvider with ChangeNotifier {
         throw ("Cannot Find The Requested Resource");
       default:
         throw (response.statusCode.toString());
+    }
+  }
+
+Future<void> sendImage() async {
+    var uuid = const Uuid();
+    var newfilename = uuid.v1();
+
+    final results = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: ['png', 'jpg']);
+
+    if (results == null) {
+      return null;
+    }
+
+    final path = results.files.single.path;
+
+    Message newInstance = Message(
+        id: newfilename.toString(),
+        username:
+            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+        datetime: DateTime.now().toString(),
+        mediatype: 'image',
+        message: 'new message',
+        path: path.toString(),
+        isUploaded: 'false');
+
+    messageslist.insert(0, newInstance);
+    saveMessages();
+
+    if (connection == ConnectionStatus.wifi) {
+      uploadImage(newInstance);
     }
   }
 
@@ -91,26 +142,7 @@ class MessageProvider with ChangeNotifier {
     });
   }
 
-  Future<void> sendMessage(String messageEntry) async {
-    addOfflineMessage(messageEntry);
-    
-    var response = await http.post(Uri.parse(API_URL),
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: {'message': messageEntry, 'path': '', 'mediatype': 'text'});
-    switch (response.statusCode) {
-      case 200:
-        {
-          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-          messageslist[0] = Message.fromJson(jsonDecode['result']);
-          saveMessages();
-        }
-        break;
-      case 404:
-        throw ("Cannot Find The Requested Resource");
-      default:
-        throw (response.statusCode.toString());
-    }
-  }
+
 
   void saveMessages() async {
     //Save messages to mobile storage
@@ -121,24 +153,6 @@ class MessageProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addOfflineMessage(String messageText) {
-    var uuid = const Uuid();
-    var newMessageID = uuid.v1();
-
-    messageslist.insert(
-        0,
-        Message(
-            id: newMessageID.toString(),
-            username:
-                'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
-            datetime: DateTime.now().toString(),
-            mediatype: 'text',
-            message: messageText,
-            path: '',
-            isUploaded: 'false'));
-    saveMessages();
-    notifyListeners();
-  }
 
   Future<void> loadMessages() async {
     //Load Messages from mobile storage
@@ -187,34 +201,5 @@ class MessageProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendImage() async {
-    var uuid = const Uuid();
-    var newfilename = uuid.v1();
-
-    final results = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        type: FileType.custom,
-        allowedExtensions: ['png', 'jpg']);
-    if (results == null) {
-      return null;
-    }
-
-    final path = results.files.single.path;
-
-    Message newInstance = Message(
-        id: newfilename.toString(),
-        username:
-            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
-        datetime: DateTime.now().toString(),
-        mediatype: 'image',
-        message: 'new message',
-        path: path.toString(),
-        isUploaded: 'false');
-
-    print("This issss $path path");
-
-    messageslist.insert(0, newInstance);
-    saveMessages();
-    uploadImage(newInstance);
-  }
+  
 }

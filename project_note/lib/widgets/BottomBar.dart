@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:project_note/globals/globals.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:project_note/providers/MessageProvider.dart';
 import 'package:project_note/views/ErrPage.dart';
-import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 
 class BottomBar extends StatefulWidget {
@@ -67,13 +62,8 @@ class _BottomBarState extends State<BottomBar> {
     );
   }
 
-  Future<void> sendOfflineMessage() async {
-    Provider.of<MessageProvider>(context, listen: false)
-        .addOfflineMessage(_messagecontroller.value.text.toString());
-    _messagecontroller.clear();
-  }
-
-  Future<void> sendOnlineMessage() async {
+  
+  Future<void> sendMessage() async {
     Provider.of<MessageProvider>(context, listen: false)
         .sendMessage(_messagecontroller.value.text.toString());
     _messagecontroller.clear();
@@ -173,7 +163,7 @@ class _BottomBarState extends State<BottomBar> {
                 ),
               ),
               IconButton(
-                  onPressed: sendOfflineMessage,
+                  onPressed: sendMessage,
                   icon: const Icon(
                     Icons.send,
                     color: Colors.blueAccent,

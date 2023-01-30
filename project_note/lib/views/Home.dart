@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:bubble/bubble.dart';
 import 'package:project_note/models/Message.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/MessageProvider.dart';
@@ -22,8 +19,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Message> _messageslist = [];
   final controller = ScrollController();
+  Color networkBarColor =
+      (connection == ConnectionStatus.wifi) ? Colors.blue : Colors.white;
 
-  late final TextEditingController _messagecontroller = TextEditingController();
   Future<void> loadMore() async {
     try {
       if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
@@ -82,6 +80,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        backgroundColor: Colors.black,
         actions: [
           IconButton(
             icon: const Icon(
@@ -90,6 +89,22 @@ class _HomeState extends State<Home> {
             ),
             onPressed: () {
               clearCache();
+              // do something
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.wifi,
+              color: (connection == ConnectionStatus.wifi)
+                  ? Colors.blue
+                  : Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                connection = (connection == ConnectionStatus.wifi)
+                    ? ConnectionStatus.noConnection
+                    : ConnectionStatus.wifi;
+              });
               // do something
             },
           )
