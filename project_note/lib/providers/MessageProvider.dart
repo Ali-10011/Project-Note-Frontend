@@ -41,6 +41,7 @@ class MessageProvider with ChangeNotifier {
               int messageindex = messageslist.indexOf(offlineMessage);
               messageslist[messageindex] =
                   Message.fromJson(jsonDecode['result']);
+
               saveMessages();
             }
             break;
@@ -52,7 +53,6 @@ class MessageProvider with ChangeNotifier {
       });
     } else if (connection == ConnectionStatus.wifi) {
       await getMessages();
-      pageno++;
     }
   }
 
@@ -117,14 +117,8 @@ class MessageProvider with ChangeNotifier {
           .decode(data)
           .map<Message>((message) => Message.fromJson(message))
           .toList();
-
-      pageno = (messageslist.length / 15)
-          .toInt(); //How many pages of messages were loaded
-      newmessages = messageslist.length %
-          15; //How many messages were loaded additional to the pages loaded
     } else if (connection == ConnectionStatus.wifi) {
       await getMessages();
-      pageno++;
     }
     notifyListeners();
   }
@@ -147,16 +141,11 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> getMoreMessages() async {
-    //This is used to load more messages due to scroll controller offset
-    Map<String, String> queryparams = {
-      'pageno': pageno.toString(),
-      'skip': newmessages.toString()
-    };
-    var url = Uri.https('localhost:3000', '/api/', queryparams);
+
     final response = await http.get(Uri.parse(
-      '$API_URL?pageno=${pageno.toString()}&skip=${newmessages.toString()}&perpage=${loadPerPage.toString()}',
+      '$API_URL?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
     ));
-/**/
+
     final data = json.decode(response.body) as List<dynamic>;
     if (data.isEmpty) {
       isLastPage = true;
@@ -165,9 +154,7 @@ class MessageProvider with ChangeNotifier {
         case 200:
           if (data.length < 15) {
             isLastPage = true;
-          } else {
-            pageno++;
-          }
+          } 
           messageslist.addAll(json
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))

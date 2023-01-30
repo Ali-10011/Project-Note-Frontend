@@ -4,16 +4,14 @@ import 'package:project_note/models/FirebaseStorage.dart';
 
 //List<Message> messageslist = [];
 bool isLastPage = false;
-int pageno = 0;
-int newmessages = 0;
+const int loadPerPage = 15;
+
 const String API_URL = 'http://localhost:3000/home';
 Storage storage = Storage();
 //DataLoad dataLoad = DataLoad();
 var connection;
 
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
-
-const int loadPerPage = 15;
 
 const styleMe = BubbleStyle(
   margin: BubbleEdges.only(top: 10, bottom: 10),
