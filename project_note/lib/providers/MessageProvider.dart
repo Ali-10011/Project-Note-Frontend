@@ -125,23 +125,7 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> getMessages() async {
     //Getting new messages from API
-    final response = await http.get(Uri.parse(API_URL));
-    switch (response.statusCode) {
-      case 200:
-        messageslist = json
-            .decode(response.body)
-            .map<Message>((message) => Message.fromJson(message))
-            .toList();
-        break;
-      case 404:
-        throw ("Could not Fetch the resource");
-      default:
-        throw (response.statusCode.toString());
-    }
-  }
-
-  Future<void> getMoreMessages() async {
-
+   
     final response = await http.get(Uri.parse(
       '$API_URL?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
     ));
@@ -167,5 +151,35 @@ class MessageProvider with ChangeNotifier {
       }
     }
     notifyListeners();
+  
   }
+
+//   Future<void> getMoreMessages() async {
+
+//     final response = await http.get(Uri.parse(
+//       '$API_URL?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
+//     ));
+
+//     final data = json.decode(response.body) as List<dynamic>;
+//     if (data.isEmpty) {
+//       isLastPage = true;
+//     } else if (data.isNotEmpty) {
+//       switch (response.statusCode) {
+//         case 200:
+//           if (data.length < 15) {
+//             isLastPage = true;
+//           } 
+//           messageslist.addAll(json
+//               .decode(response.body)
+//               .map<Message>((message) => Message.fromJson(message))
+//               .toList());
+//           break;
+//         case 404:
+//           throw ("Could not Find the Resource");
+//         default:
+//           throw (response.statusCode.toString());
+//       }
+//     }
+//     notifyListeners();
+//   }
 }

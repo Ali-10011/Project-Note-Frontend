@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:bubble/bubble.dart';
 import 'package:project_note/models/Message.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:intl/intl.dart';
 import 'package:project_note/providers/MessageProvider.dart';
 import 'package:project_note/views/ErrPage.dart';
 import 'package:project_note/animations/HeroAnimation.dart';
@@ -28,7 +27,7 @@ class _HomeState extends State<Home> {
   Future<void> loadMore() async {
     try {
       if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
-        Provider.of<MessageProvider>(context, listen: false).getMoreMessages();
+        Provider.of<MessageProvider>(context, listen: false).getMessages();
       }
     } on Exception catch (e) {
       Navigator.pushReplacement(
