@@ -135,6 +135,7 @@ class _HomeState extends State<Home> {
                       if (i < _messageslist.length) {
                         if (_messageslist[i].mediatype.compareTo('image') ==
                             0) {
+                          DateTime current = DateTime.now();
                           return InkWell(
                               onTap: () {
                                 Navigator.push(
@@ -158,7 +159,7 @@ class _HomeState extends State<Home> {
                           ),
                         );
                       } else {
-                         Provider.of<MessageProvider>(context, listen: false)
+                        Provider.of<MessageProvider>(context, listen: false)
                             .getMessages();
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),

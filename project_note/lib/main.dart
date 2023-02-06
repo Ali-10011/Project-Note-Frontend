@@ -7,13 +7,29 @@ import 'package:project_note/views/HomeLoader.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/providers/MessageProvider.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:project_note/globals/globals.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Obtain a list of the available cameras on the device.
+  final cameras = await availableCameras();
+
+  // Get a specific camera from the list of available cameras.
+  firstCamera = cameras.first;
+
   await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  runApp(MultiProvider(providers: [ChangeNotifierProvider(create: (_) => MessageProvider())] ,child: const MyApp()));
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => MessageProvider())],
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -22,6 +38,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData.dark(),
       title: 'Note',
       initialRoute: '/initial',
       routes: {
@@ -29,8 +46,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => Home(),
         '/initial': (context) => LoadingState(),
         '/err': (context) => ErrPage(),
-       
-
       },
       debugShowCheckedModeBanner: false,
     );

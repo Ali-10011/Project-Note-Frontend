@@ -13,10 +13,10 @@ Widget imageTile(Message messageEntry) {
   return Bubble(
     style: styleMe,
     child: ListTile(
-      contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0),
+      contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0),
       title: Container(
           color: Colors.white,
-          height: screenHeight * 0.45,
+          height: screenHeight * 0.3,
           child: (messageEntry.isUploaded == 'true')
               ? CachedNetworkImage(
                   key: UniqueKey(),

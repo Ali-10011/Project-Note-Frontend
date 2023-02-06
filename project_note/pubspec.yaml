@@ -47,6 +47,9 @@ dependencies:
   shared_preferences:
   connectivity_plus:
   provider:
+  camera:
+  path_provider:
+  path:
 
 dev_dependencies:
   flutter_test:

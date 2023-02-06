@@ -112,6 +112,30 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
+  Future<void> sendCameraImage(String imagePath) async
+  {
+    var uuid = const Uuid();
+    var newfilename = uuid.v1();
+
+     Message newInstance = Message(
+        id: newfilename.toString(),
+        username:
+            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+        datetime: DateTime.now().toString(),
+        mediatype: 'image',
+        message: 'new message',
+        path: imagePath.toString(),
+        isUploaded: 'false');
+
+    messageslist.insert(0, newInstance);
+    saveMessages();
+
+    if (connection == ConnectionStatus.wifi) {
+      uploadImage(newInstance);
+    }
+    
+  }
+
   void uploadImage(Message messageInstance) {
     storage
         .uploadfile(messageInstance.path, messageInstance.id)

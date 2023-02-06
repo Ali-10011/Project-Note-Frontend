@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/MessageProvider.dart';
+import 'package:project_note/views/CameraPicture.dart';
 import 'package:project_note/views/ErrPage.dart';
 import 'package:provider/provider.dart';
 
@@ -62,7 +64,6 @@ class _BottomBarState extends State<BottomBar> {
     );
   }
 
-  
   Future<void> sendMessage() async {
     Provider.of<MessageProvider>(context, listen: false)
         .sendMessage(_messagecontroller.value.text.toString());
@@ -83,7 +84,16 @@ class _BottomBarState extends State<BottomBar> {
                   builder: (context) => ErrPage(statusCode: e.toString()),
                 ));
           }
+        } else if (text == "Camera") {
+          print("Camera");
+          Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TakePictureScreen(camera: firstCamera),
+                ));
+          
         } else {
+          print("Camera");
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Feature under Development!"),
           ));
