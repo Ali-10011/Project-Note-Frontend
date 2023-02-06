@@ -5,7 +5,7 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/Message.dart';
 
 Widget messageTile(Message messageEntry) {
-  final format = DateFormat("h:mma");
+  final format = DateFormat("h:mm a");
   final clockString = format.format(DateTime.parse(messageEntry.datetime));
   return Bubble(
     style: styleMe,
@@ -18,11 +18,9 @@ Widget messageTile(Message messageEntry) {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         ),
         const SizedBox(width: 10),
-        Icon(
-            (messageEntry.isUploaded == 'true') ? Icons.check : Icons.error,
+        Icon((messageEntry.isUploaded == 'true') ? Icons.check : Icons.error,
             size: 12)
       ]),
     ),
   );
 }
-

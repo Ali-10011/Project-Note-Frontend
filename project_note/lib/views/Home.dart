@@ -158,6 +158,8 @@ class _HomeState extends State<Home> {
                           ),
                         );
                       } else {
+                         Provider.of<MessageProvider>(context, listen: false)
+                            .getMessages();
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: Center(child: CircularProgressIndicator()),

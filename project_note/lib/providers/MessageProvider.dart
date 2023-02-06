@@ -58,6 +58,7 @@ class MessageProvider with ChangeNotifier {
     }, body: {
       'message': messageInstance.message,
       'path': messageInstance.path,
+      'dateTime' : messageInstance.datetime,
       'mediatype': messageInstance.mediatype
     });
 
@@ -120,7 +121,9 @@ class MessageProvider with ChangeNotifier {
       }, body: {
         'message': 'new message',
         'path': value,
+        'dateTime': DateTime.now().toString(),
         'mediatype': 'image'
+
       });
 
       switch (response.statusCode) {

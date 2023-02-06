@@ -24,8 +24,8 @@ class PhotoHero extends StatelessWidget {
                 ? CachedNetworkImage(
                     key: UniqueKey(),
                     imageUrl: messageEntry.path.toString(),
-                    fit: BoxFit.cover)
-                : Image.file(File(messageEntry.path), fit: BoxFit.cover)),
+                    fit: BoxFit.contain)
+                : Image.file(File(messageEntry.path), fit: BoxFit.contain)),
       ),
     );
   }

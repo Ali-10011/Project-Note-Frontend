@@ -1,4 +1,3 @@
-
 class Message {
   //Message Class with Json Encode and Decode Function
   late String id;
@@ -21,7 +20,7 @@ class Message {
     return Message(
         id: json['_id'],
         username: json['username'],
-        datetime: json['createdAt'],
+        datetime: json['dateTime'],
         mediatype: json['mediatype'],
         message: json['message'],
         path: json['path'],
@@ -31,11 +30,10 @@ class Message {
   Map<dynamic, dynamic> toJson() => {
         '_id': id,
         'username': username,
-        'createdAt': datetime,
+        'dateTime': datetime,
         'mediatype': mediatype,
         'message': message,
         'path': path,
         'isUploaded': isUploaded
       };
 }
-
