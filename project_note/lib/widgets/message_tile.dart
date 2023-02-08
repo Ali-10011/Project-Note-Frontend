@@ -5,8 +5,7 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/Message.dart';
 
 Widget messageTile(Message messageEntry) {
-  final format = DateFormat("h:mm a");
-  final clockString = format.format(DateTime.parse(messageEntry.datetime));
+  final clockString = dateTimeString(DateTime.parse(messageEntry.datetime));
   return Bubble(
     style: styleMe,
     child: ListTile(

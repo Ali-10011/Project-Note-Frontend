@@ -8,7 +8,7 @@ import 'package:project_note/animations/HeroAnimation.dart';
 import 'package:project_note/widgets/image_tile.dart';
 import 'package:project_note/widgets/message_tile.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/widgets/BottomBar.dart';
+import 'package:project_note/widgets/bottom_bar.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);

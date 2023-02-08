@@ -16,7 +16,7 @@ class _BottomBarState extends State<BottomBar> {
   late final TextEditingController _messagecontroller = TextEditingController();
   Widget bottomSheet() {
     return Container(
-      height: 278,
+      height: screenHeight / 3,
       width: MediaQuery.of(context).size.width,
       child: Card(
         margin: const EdgeInsets.all(18.0),
@@ -24,36 +24,19 @@ class _BottomBarState extends State<BottomBar> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  iconCreation(
-                      Icons.insert_drive_file, Colors.indigo, "Document"),
-                  const SizedBox(
-                    width: 40,
-                  ),
                   iconCreation(Icons.camera_alt, Colors.pink, "Camera"),
-                  const SizedBox(
-                    width: 40,
-                  ),
-                  iconCreation(Icons.insert_photo, Colors.purple, "Gallery"),
+                  iconCreation(Icons.insert_photo, Colors.purple, "Image"),
                 ],
               ),
-              const SizedBox(
-                height: 30,
-              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  iconCreation(Icons.headset, Colors.orange, "Audio"),
-                  const SizedBox(
-                    width: 40,
-                  ),
-                  iconCreation(Icons.location_pin, Colors.teal, "Location"),
-                  const SizedBox(
-                    width: 40,
-                  ),
+                  iconCreation(Icons.video_camera_front, Colors.black, "Video"),
                   iconCreation(Icons.person, Colors.blue, "Contact"),
                 ],
               ),
@@ -85,15 +68,12 @@ class _BottomBarState extends State<BottomBar> {
                 ));
           }
         } else if (text == "Camera") {
-          print("Camera");
           Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TakePictureScreen(camera: firstCamera),
-                ));
-          
+              context,
+              MaterialPageRoute(
+                builder: (context) => TakePictureScreen(camera: firstCamera),
+              ));
         } else {
-          print("Camera");
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Feature under Development!"),
           ));
@@ -146,7 +126,7 @@ class _BottomBarState extends State<BottomBar> {
                   },
                   icon: const Icon(
                     Icons.add,
-                    color: Colors.black,
+                    color: Colors.white,
                   )),
               Container(
                 width: MediaQuery.of(context).size.width * 0.75,

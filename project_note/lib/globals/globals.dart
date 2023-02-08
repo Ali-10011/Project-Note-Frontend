@@ -1,6 +1,7 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/models/FirebaseStorage.dart';
+import 'package:intl/intl.dart';
 
 //List<Message> messageslist = [];
 bool isLastPage = false;
@@ -25,3 +26,27 @@ const styleMe = BubbleStyle(
   nip: BubbleNip.rightTop,
   color: Color.fromARGB(255, 138, 62, 201),
 );
+
+int daysBetween(DateTime from, DateTime to) {
+  from = DateTime(from.year, from.month, from.day);
+  to = DateTime(to.year, to.month, to.day);
+  return (to.difference(from).inHours / 24).round();
+}
+
+String dateTimeString(DateTime messageDt) {
+  int daysApart = daysBetween(messageDt, DateTime.now());
+
+  if (daysApart == 0) {
+    final format = DateFormat("h:mm a");
+    var todayDate = format.format(DateTime.parse(messageDt.toString()));
+    return ("Today at $todayDate");
+  } else if (daysApart == 1) {
+    final format = DateFormat("h:mm a");
+    var todayDate = format.format(DateTime.parse(messageDt.toString()));
+    return ("Yesterday at $todayDate");
+  } else {
+    final format = DateFormat("dd/MM/yyyy h:mm a");
+    var todayDate = format.format(DateTime.parse(messageDt.toString()));
+    return todayDate;
+  }
+}
