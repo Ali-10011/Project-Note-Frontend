@@ -57,7 +57,7 @@ class _BottomBarState extends State<BottomBar> {
     return InkWell(
       onTap: () async {
         Navigator.pop(context);
-        if (text == 'Gallery') {
+        if (text == 'Image') {
           try {
             Provider.of<MessageProvider>(context, listen: false).sendImage();
           } on Exception catch (e) {
@@ -73,6 +73,17 @@ class _BottomBarState extends State<BottomBar> {
               MaterialPageRoute(
                 builder: (context) => TakePictureScreen(camera: firstCamera),
               ));
+        }
+        else if (text == "Video") {
+          try {
+            Provider.of<MessageProvider>(context, listen: false).sendVideo();
+          } on Exception catch (e) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ErrPage(statusCode: e.toString()),
+                ));
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Feature under Development!"),

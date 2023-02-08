@@ -5,7 +5,9 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/MessageProvider.dart';
 import 'package:project_note/views/ErrPage.dart';
 import 'package:project_note/animations/HeroAnimation.dart';
+import 'package:project_note/views/VideoPlayer.dart';
 import 'package:project_note/widgets/image_tile.dart';
+import 'package:project_note/widgets/video_tile.dart';
 import 'package:project_note/widgets/message_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/widgets/bottom_bar.dart';
@@ -20,6 +22,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Message> _messageslist = [];
   final controller = ScrollController();
+
   Color networkBarColor =
       (connection == ConnectionStatus.wifi) ? Colors.blue : Colors.white;
 
@@ -135,7 +138,6 @@ class _HomeState extends State<Home> {
                       if (i < _messageslist.length) {
                         if (_messageslist[i].mediatype.compareTo('image') ==
                             0) {
-                          DateTime current = DateTime.now();
                           return InkWell(
                               onTap: () {
                                 Navigator.push(
@@ -147,10 +149,25 @@ class _HomeState extends State<Home> {
                                     ));
                               },
                               child: imageTile(_messageslist[i]));
+                        }
+                        if (_messageslist[i].mediatype.compareTo('video') ==
+                            0) {
+                          return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VideoHero(
+                                        videoUrl: _messageslist[i].path,
+                                      ),
+                                    ));
+                              },
+                              child: videoTile(_messageslist[i]));
                         } else {
                           return (messageTile(_messageslist[i]));
                         }
-                      } else if (isLastPage) {
+                      } else if (isLastPage ||
+                          connection == ConnectionStatus.noConnection) {
                         return const Padding(
                           padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
                           child: Divider(

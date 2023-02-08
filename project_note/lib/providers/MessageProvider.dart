@@ -165,6 +165,70 @@ class MessageProvider with ChangeNotifier {
     });
   }
 
+
+
+  Future<void> sendVideo() async {
+    var uuid = const Uuid();
+    var newfilename = uuid.v1();
+
+    final results = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mkv', 'mov']);
+
+    if (results == null) {
+      return null;
+    }
+
+    final path = results.files.single.path;
+
+
+    Message newInstance = Message(
+        id: newfilename.toString(),
+        username:
+            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+        datetime: DateTime.now().toString(),
+        mediatype: 'video',
+        message: 'new message',
+        path: path.toString(),
+        isUploaded: 'false');
+
+    messageslist.insert(0, newInstance);
+    saveMessages();
+
+    if (connection == ConnectionStatus.wifi) {
+      uploadVideo(newInstance);
+    }
+  }
+
+  void uploadVideo(Message messageInstance) {
+    storage
+        .uploadVideo(messageInstance.path, messageInstance.id)
+        .then((value) async {
+      var response = await http.post(Uri.parse(API_URL), headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }, body: {
+        'message': 'new message',
+        'path': value,
+        'dateTime': DateTime.now().toString(),
+        'mediatype': 'video'
+      });
+
+      switch (response.statusCode) {
+        case 200:
+          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+          int messageIndex = messageslist.indexOf(messageInstance);
+          messageslist[messageIndex] = Message.fromJson(jsonDecode['result']);
+          saveMessages();
+          break;
+        case 404:
+          throw ("Cannot Find The Requested Resource");
+        default:
+          throw (response.statusCode.toString());
+      }
+    });
+  }
+
   void saveMessages() async {
     //Save messages to mobile storage
 

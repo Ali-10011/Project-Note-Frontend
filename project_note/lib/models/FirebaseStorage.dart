@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-//import 'package:firebase_core/firebase_core.dart ' as firebase_core;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 
 class Storage {
@@ -27,8 +26,23 @@ class Storage {
           await storage.ref('Images/$imageName').getDownloadURL();
       return downloadURL;
     } on firebase_core.FirebaseException catch (e) {
-      print(e);
       throw Exception('Firebase Error: $e');
     }
   }
+
+  Future<String> uploadVideo(String filePath, String fileName) async {
+    final imageref = storage.ref('Videos/$fileName');
+    File file = File(filePath);
+
+    try {
+      await imageref.putFile(file);
+      String url = await imageref.getDownloadURL();
+      return url;
+    } on firebase_core.FirebaseException catch (e) {
+      throw Exception('Firebase Error: $e');
+    }
+  }
+
+
 }
+
