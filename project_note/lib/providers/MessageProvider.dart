@@ -9,7 +9,7 @@ import 'package:uuid/uuid.dart';
 
 class MessageProvider with ChangeNotifier {
   List<Message> messageslist = [];
-
+  List<String> deletedMessagesList = [];
   List<Message> get messages {
     return [...messageslist];
   }
@@ -30,6 +30,22 @@ class MessageProvider with ChangeNotifier {
       });
     } else if (connection == ConnectionStatus.wifi) {
       await getMessages();
+    }
+  }
+
+  Future<void> deleteFlaggedMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('deletedMessages') ?? '';
+
+    if (data != '' && data.isNotEmpty) {
+      deletedMessagesList =
+          json.decode(data).map<String>((e) => e.toString()).toSet().toList();
+      deletedMessagesList.forEach((flaggedMessage) {
+        deleteMessagefromDatabase(flaggedMessage);
+      });
+    } else {
+      await prefs.setString(
+          'deletedMessages', json.encode(deletedMessagesList));
     }
   }
 
@@ -58,7 +74,7 @@ class MessageProvider with ChangeNotifier {
     }, body: {
       'message': messageInstance.message,
       'path': messageInstance.path,
-      'dateTime' : messageInstance.datetime,
+      'dateTime': messageInstance.datetime,
       'mediatype': messageInstance.mediatype
     });
 
@@ -77,6 +93,63 @@ class MessageProvider with ChangeNotifier {
       default:
         throw (response.statusCode.toString());
     }
+  }
+
+  void deleteMessage(Message messageInstance) {
+    messageslist.remove(messageInstance);
+    saveMessages();
+    if (connection == ConnectionStatus.wifi) {
+      deleteMessagefromDatabase(messageInstance.id);
+    } else if (messageInstance.isUploaded == "true") {
+      flagforDeletion(messageInstance.id);
+    }
+  }
+
+  void deleteMessagefromDatabase(String messageID) async {
+    var response = await http.delete(
+      Uri.parse("$API_URL/messages/$messageID"),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+    );
+
+    switch (response.statusCode) {
+      case 200:
+        {
+          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+
+          if (jsonDecode['deletedCount'] == 0) {
+            flagforDeletion(messageID);
+          } else {
+            removeflagforDeletion(messageID);
+          }
+        }
+        break;
+      case 404:
+        {
+          flagforDeletion(messageID);
+          throw ("Cannot Find The Requested Resource");
+        }
+
+      default:
+        {
+          flagforDeletion(messageID);
+          throw (response.statusCode.toString());
+        }
+    }
+  }
+
+  void flagforDeletion(String messageID) async {
+    //Message couldn't be deleted so it is saved to be deleted during next sync
+    deletedMessagesList.add(messageID);
+    deletedMessagesList = deletedMessagesList.toSet().toList();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('deletedMessages', json.encode(deletedMessagesList));
+  }
+
+  void removeflagforDeletion(String messageID) async {
+    deletedMessagesList = deletedMessagesList.toSet().toList();
+    deletedMessagesList.remove(messageID);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('deletedMessages', json.encode(deletedMessagesList));
   }
 
   Future<void> sendImage() async {
@@ -112,12 +185,11 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sendCameraImage(String imagePath) async
-  {
+  Future<void> sendCameraImage(String imagePath) async {
     var uuid = const Uuid();
     var newfilename = uuid.v1();
 
-     Message newInstance = Message(
+    Message newInstance = Message(
         id: newfilename.toString(),
         username:
             'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
@@ -133,7 +205,6 @@ class MessageProvider with ChangeNotifier {
     if (connection == ConnectionStatus.wifi) {
       uploadImage(newInstance);
     }
-    
   }
 
   void uploadImage(Message messageInstance) {
@@ -147,7 +218,6 @@ class MessageProvider with ChangeNotifier {
         'path': value,
         'dateTime': DateTime.now().toString(),
         'mediatype': 'image'
-
       });
 
       switch (response.statusCode) {
@@ -165,8 +235,6 @@ class MessageProvider with ChangeNotifier {
     });
   }
 
-
-
   Future<void> sendVideo() async {
     var uuid = const Uuid();
     var newfilename = uuid.v1();
@@ -181,7 +249,6 @@ class MessageProvider with ChangeNotifier {
     }
 
     final path = results.files.single.path;
-
 
     Message newInstance = Message(
         id: newfilename.toString(),

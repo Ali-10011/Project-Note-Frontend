@@ -148,7 +148,7 @@ class _HomeState extends State<Home> {
                                       ),
                                     ));
                               },
-                              child: imageTile(_messageslist[i]));
+                              child: imageTile(_messageslist[i], context));
                         }
                         if (_messageslist[i].mediatype.compareTo('video') ==
                             0) {
@@ -162,9 +162,9 @@ class _HomeState extends State<Home> {
                                       ),
                                     ));
                               },
-                              child: videoTile(_messageslist[i]));
+                              child: videoTile(_messageslist[i], context));
                         } else {
-                          return (messageTile(_messageslist[i]));
+                          return (messageTile(_messageslist[i], context));
                         }
                       } else if (isLastPage ||
                           connection == ConnectionStatus.noConnection) {
