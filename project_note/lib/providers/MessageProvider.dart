@@ -24,8 +24,10 @@ class MessageProvider with ChangeNotifier {
           .forEach((offlineMessage) async {
         if (offlineMessage.mediatype == 'text') {
           uploadText(offlineMessage);
-        } else {
+        } else if (offlineMessage.mediatype == 'image') {
           uploadImage(offlineMessage);
+        } else if (offlineMessage.mediatype == 'video') {
+          uploadVideo(offlineMessage);
         }
       });
     } else if (connection == ConnectionStatus.wifi) {
@@ -216,7 +218,7 @@ class MessageProvider with ChangeNotifier {
       }, body: {
         'message': 'new message',
         'path': value,
-        'dateTime': DateTime.now().toString(),
+        'dateTime': messageInstance.datetime,
         'mediatype': 'image'
       });
 
@@ -277,7 +279,7 @@ class MessageProvider with ChangeNotifier {
       }, body: {
         'message': 'new message',
         'path': value,
-        'dateTime': DateTime.now().toString(),
+        'dateTime': messageInstance.datetime,
         'mediatype': 'video'
       });
 

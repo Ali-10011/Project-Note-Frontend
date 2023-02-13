@@ -19,29 +19,20 @@ Widget imageTile(Message messageEntry, BuildContext context) {
           margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
           color: Colors.white,
           height: screenHeight * 0.3,
-          child: (messageEntry.isUploaded == 'true')
-              ? CachedNetworkImage(
-                  key: UniqueKey(),
-                  imageUrl: messageEntry.path.toString(),
-                  fit: BoxFit.cover)
-              : Image.file(File(messageEntry.path), fit: BoxFit.cover)),
-      subtitle:
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(children: <Widget>[
-        Text(
+          child: isImageValid(messageEntry)),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(children: <Widget>[
+            Text(
               clockString,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-        ),
-        const SizedBox(width: 10),
-        Icon((messageEntry.isUploaded == 'true') ? Icons.check : Icons.error,
+            ),
+            const SizedBox(width: 10),
+            Icon(
+                (messageEntry.isUploaded == 'true') ? Icons.check : Icons.error,
                 size: 12),
-              
-      ]
-      
-      ),
-        
+          ]),
           IconButton(
             padding: const EdgeInsets.all(0),
             onPressed: () {
@@ -51,8 +42,26 @@ Widget imageTile(Message messageEntry, BuildContext context) {
             icon: const Icon(Icons.delete),
             color: Colors.black,
           )
-            ],
-          ),
+        ],
+      ),
     ),
   );
+}
+
+Widget isImageValid(Message messageEntry) {
+  try 
+  {
+  if (messageEntry.isUploaded == 'true') {
+    return CachedNetworkImage(
+        key: UniqueKey(),
+        imageUrl: messageEntry.path.toString(),
+        fit: BoxFit.cover);
+  } else {
+    return Image.file(File(messageEntry.path), fit: BoxFit.cover);
+  }
+  }
+  catch (e)
+  {
+    return Image.asset('assets/placeholder.png');
+  }
 }
