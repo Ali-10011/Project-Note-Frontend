@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:project_note/animations/ProfileHero.dart';
 import 'package:project_note/models/Message.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/MessageProvider.dart';
@@ -83,7 +84,23 @@ class _HomeState extends State<Home> {
     _messageslist = context.watch<MessageProvider>().messages;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: InkWell(
+          onTap: ()
+          {
+            Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ProfileHero()),
+          );
+          }, 
+          child: Hero(
+            tag: "Profile",
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(25.0),
+                child: Image.asset('assets/placeholder.png',
+                    height: 50.0, width: 50.0, fit: BoxFit.cover)),
+          ),
+        ),
         backgroundColor: Colors.black,
         actions: [
           IconButton(

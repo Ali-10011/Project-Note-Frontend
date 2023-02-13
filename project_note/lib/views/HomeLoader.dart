@@ -29,10 +29,10 @@ class _LoadingStateState extends State<LoadingState> {
   }
 
   void uploadMessages() {
-   
-      Provider.of<MessageProvider>(context, listen: false)
-          .uploadOfflineMessages();
-    WidgetsBinding.instance.addPostFrameCallback((_) { //To Navigate From a Future  Builder
+    Provider.of<MessageProvider>(context, listen: false)
+        .uploadOfflineMessages();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      //To Navigate From a Future  Builder
       Navigator.pushReplacementNamed(context, '/home');
     });
   }
@@ -72,9 +72,8 @@ class _LoadingStateState extends State<LoadingState> {
                     if (dataSnapshot.connectionState ==
                         ConnectionState.waiting) {
                       return Center(
-                        
                         child: Column(
-                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
                             CircularProgressIndicator(),
                             Text("Syncing your Changes....")
@@ -84,12 +83,18 @@ class _LoadingStateState extends State<LoadingState> {
                     } else if (dataSnapshot.connectionState ==
                         ConnectionState.done) {
                       uploadMessages();
-                      return const Home();
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          CircularProgressIndicator(),
+                          Text("Uploading Your Messages....")
+                        ],
+                      );
+                      ;
                     } else {
                       return Center(
-                        
                         child: Column(
-                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
                             CircularProgressIndicator(),
                             Text("Ooops, something unexpeccted Happened")

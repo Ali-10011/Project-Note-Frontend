@@ -24,7 +24,7 @@ const styleMe = BubbleStyle(
   elevation: 2,
   alignment: Alignment.topRight,
   nip: BubbleNip.rightTop,
-  color: Color.fromARGB(255, 138, 62, 201),
+  color: Color.fromARGB(255, 62, 173, 201),
 );
 
 int daysBetween(DateTime from, DateTime to) {
@@ -50,3 +50,9 @@ String dateTimeString(DateTime messageDt) {
     return todayDate;
   }
 }
+
+
+//Radial Expansion
+ const double kMinRadius = 32.0;
+ const double kMaxRadius = 128.0;
+const opacityCurve = const Interval(0.0, 0.75, curve: Curves.fastOutSlowIn);
