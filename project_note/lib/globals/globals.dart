@@ -9,7 +9,7 @@ const int loadPerPage = 15;
 
 const String apiUrl = 'http://localhost:3000/home';
 Storage storage = Storage();
-late ConnectionStatus connection;
+var connection;
 
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 

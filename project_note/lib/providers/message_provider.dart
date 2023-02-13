@@ -247,7 +247,7 @@ class MessageProvider with ChangeNotifier {
         allowedExtensions: ['mp4', 'mkv', 'mov']);
 
     if (results == null) {
-      return null;
+      return;
     }
 
     final path = results.files.single.path;
