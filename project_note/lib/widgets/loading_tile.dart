@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/models/Message.dart';
+import 'package:project_note/models/message_model.dart';
 
 Widget loadingTile(Message messageEntry) {
   final clockString = dateTimeString(DateTime.parse(messageEntry.datetime));

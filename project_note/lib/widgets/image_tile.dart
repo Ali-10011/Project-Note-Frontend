@@ -4,10 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/models/Message.dart';
+import 'package:project_note/models/message_model.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/MessageProvider.dart';
+import '../providers/message_provider.dart';
 
 Widget imageTile(Message messageEntry, BuildContext context) {
   final clockString = dateTimeString(DateTime.parse(messageEntry.datetime));

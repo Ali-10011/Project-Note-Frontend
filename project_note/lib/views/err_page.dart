@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ErrPage extends StatelessWidget {
-  final statusCode;
-  const ErrPage({super.key, this.statusCode});
+  final String statusCode;
+  const ErrPage({super.key, required this.statusCode});
 
   @override
   Widget build(BuildContext context) {

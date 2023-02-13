@@ -7,7 +7,7 @@ IconData icon = Icons.pause;
 
 class VideoHero extends StatefulWidget {
   const VideoHero({Key? key, required this.videoUrl}) : super(key: key);
-  final videoUrl;
+  final String videoUrl;
   @override
   State<VideoHero> createState() => _VideoHeroState();
 }

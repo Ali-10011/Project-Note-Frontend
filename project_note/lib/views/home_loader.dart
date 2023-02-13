@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:project_note/views/ErrPage.dart';
+import 'package:project_note/views/err_page.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/providers/MessageProvider.dart';
-import 'package:project_note/views/Home.dart';
+import 'package:project_note/providers/message_provider.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({Key? key}) : super(key: key);
@@ -90,7 +89,6 @@ class _LoadingStateState extends State<LoadingState> {
                           Text("Uploading Your Messages....")
                         ],
                       );
-                      ;
                     } else {
                       return Center(
                         child: Column(

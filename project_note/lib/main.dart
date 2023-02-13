@@ -1,17 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:project_note/views/Authentication.dart';
-import 'package:project_note/views/Home.dart';
-import 'package:project_note/views/ErrPage.dart';
-import 'package:project_note/views/HomeLoader.dart';
+//import 'package:project_note/views/authentication_page.dart';
+import 'package:project_note/views/home_page.dart';
+import 'package:project_note/views/home_loader.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/providers/MessageProvider.dart';
-import 'dart:async';
-import 'dart:io';
-
+import 'package:project_note/providers/message_provider.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
 
 void main() async {
@@ -42,10 +37,9 @@ class MyApp extends StatelessWidget {
       title: 'Note',
       initialRoute: '/initial',
       routes: {
-        '/auth': (context) => Auth(),
-        '/home': (context) => Home(),
-        '/initial': (context) => LoadingState(),
-        '/err': (context) => ErrPage(),
+        //'/auth': (context) => const Auth(),
+        '/home': (context) => const Home(),
+        '/initial': (context) => const LoadingState(),
       },
       debugShowCheckedModeBanner: false,
     );

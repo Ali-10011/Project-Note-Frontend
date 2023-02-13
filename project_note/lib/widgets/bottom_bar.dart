@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/providers/MessageProvider.dart';
-import 'package:project_note/views/CameraPicture.dart';
-import 'package:project_note/views/ErrPage.dart';
+import 'package:project_note/providers/message_provider.dart';
+import 'package:project_note/views/camera_picture.dart';
+import 'package:project_note/views/err_page.dart';
 import 'package:provider/provider.dart';
 
 class BottomBar extends StatefulWidget {
@@ -15,7 +15,7 @@ class BottomBar extends StatefulWidget {
 class _BottomBarState extends State<BottomBar> {
   late final TextEditingController _messagecontroller = TextEditingController();
   Widget bottomSheet() {
-    return Container(
+    return SizedBox(
       height: screenHeight / 3,
       width: MediaQuery.of(context).size.width,
       child: Card(
@@ -122,55 +122,52 @@ class _BottomBarState extends State<BottomBar> {
     return Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          //color: Colors.white,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                  //padding: EdgeInsets.all(0.0),
-                  onPressed: () {
-                    showModalBottomSheet(
-                        backgroundColor: Colors.transparent,
-                        context: context,
-                        builder: (builder) => bottomSheet());
-                  },
-                  icon: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  )),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: TextField(
-                  controller: _messagecontroller,
-                  maxLines: 3,
-                  minLines: 1,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        _messagecontroller.clear();
-                      },
-                      icon: const Icon(Icons.clear),
-                    ),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    border: const OutlineInputBorder(),
-                    hintText: 'Enter Text',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+                //padding: EdgeInsets.all(0.0),
+                onPressed: () {
+                  showModalBottomSheet(
+                      backgroundColor: Colors.transparent,
+                      context: context,
+                      builder: (builder) => bottomSheet());
+                },
+                icon: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                )),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.75,
+              child: TextField(
+                controller: _messagecontroller,
+                maxLines: 3,
+                minLines: 1,
+                keyboardType: TextInputType.multiline,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      _messagecontroller.clear();
+                    },
+                    icon: const Icon(Icons.clear),
                   ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  border: const OutlineInputBorder(),
+                  hintText: 'Enter Text',
                 ),
               ),
-              IconButton(
-                  onPressed: sendMessage,
-                  icon: const Icon(
-                    Icons.send,
-                    color: Colors.blueAccent,
-                  ))
-            ],
-          ),
+            ),
+            IconButton(
+                onPressed: sendMessage,
+                icon: const Icon(
+                  Icons.send,
+                  color: Colors.blueAccent,
+                ))
+          ],
         ));
   }
 }

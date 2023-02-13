@@ -1,21 +1,22 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:project_note/models/FirebaseStorage.dart';
+import 'package:project_note/models/firebase_storage.dart';
 import 'package:intl/intl.dart';
 
 //List<Message> messageslist = [];
 bool isLastPage = false;
 const int loadPerPage = 15;
 
-const String API_URL = 'http://localhost:3000/home';
+const String apiUrl = 'http://localhost:3000/home';
 Storage storage = Storage();
-var connection;
+late ConnectionStatus connection;
 
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 
 double screenWidth = 0;
 double screenHeight = 0;
 
+// ignore: prefer_typing_uninitialized_variables
 late final firstCamera;
 
 const styleMe = BubbleStyle(
@@ -52,7 +53,3 @@ String dateTimeString(DateTime messageDt) {
 }
 
 
-//Radial Expansion
- const double kMinRadius = 32.0;
- const double kMaxRadius = 128.0;
-const opacityCurve = const Interval(0.0, 0.75, curve: Curves.fastOutSlowIn);

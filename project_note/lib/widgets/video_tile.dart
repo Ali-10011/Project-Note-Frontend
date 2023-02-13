@@ -1,11 +1,10 @@
-import 'package:cached_video_player/cached_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/models/Message.dart';
+import 'package:project_note/models/message_model.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/MessageProvider.dart';
+import '../providers/message_provider.dart';
 
 Widget videoTile(Message messageEntry, BuildContext context) {
   final clockString = dateTimeString(DateTime.parse(messageEntry.datetime));

@@ -1,12 +1,12 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:project_note/animations/ProfileHero.dart';
-import 'package:project_note/models/Message.dart';
+import 'package:project_note/animations/profile_hero.dart';
+import 'package:project_note/models/message_model.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/providers/MessageProvider.dart';
-import 'package:project_note/views/ErrPage.dart';
-import 'package:project_note/animations/HeroAnimation.dart';
-import 'package:project_note/views/VideoPlayer.dart';
+import 'package:project_note/providers/message_provider.dart';
+import 'package:project_note/views/err_page.dart';
+import 'package:project_note/animations/image_hero.dart';
+import 'package:project_note/views/video_player.dart';
 import 'package:project_note/widgets/image_tile.dart';
 import 'package:project_note/widgets/video_tile.dart';
 import 'package:project_note/widgets/message_tile.dart';
@@ -155,17 +155,20 @@ class _HomeState extends State<Home> {
                       if (i < _messageslist.length) {
                         if (_messageslist[i].mediatype.compareTo('image') ==
                             0) {
-                          return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PhotoHero(
-                                        messageEntry: _messageslist[i],
-                                      ),
-                                    ));
-                              },
-                              child: imageTile(_messageslist[i], context));
+                          return Hero(
+                            tag: _messageslist[i].id,
+                            child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PhotoHero(
+                                          messageEntry: _messageslist[i],
+                                        ),
+                                      ));
+                                },
+                                child: imageTile(_messageslist[i], context)),
+                          );
                         }
                         if (_messageslist[i].mediatype.compareTo('video') ==
                             0) {

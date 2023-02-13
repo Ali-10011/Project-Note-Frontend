@@ -1,19 +1,18 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:project_note/models/Message.dart';
+import 'package:project_note/models/message_model.dart';
 
 class PhotoHero extends StatelessWidget {
   const PhotoHero({Key? key, required this.messageEntry}) : super(key: key);
 
   final Message messageEntry;
 
+  @override
   Widget build(BuildContext context) {
-    //timeDilation = 1.3;
+    //timeDilation = 2.0;
     return Hero(
-      tag: messageEntry,
+      tag: messageEntry.id,
       child: Material(
         color: Colors.transparent,
         child: InkWell(

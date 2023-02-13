@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/providers/MessageProvider.dart';
+import 'package:project_note/providers/message_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:project_note/views/ErrPage.dart';
+import 'package:project_note/views/err_page.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
@@ -81,7 +81,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                 builder: (context) => ErrPage(statusCode: e.toString()),
               ),
             );
-            print(e);
+          
           }
         },
         child: const Icon(Icons.camera_alt),

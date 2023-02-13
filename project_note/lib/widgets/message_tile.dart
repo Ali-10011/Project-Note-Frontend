@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
-import 'package:intl/intl.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/models/Message.dart';
-import 'package:project_note/providers/MessageProvider.dart';
+import 'package:project_note/models/message_model.dart';
+import 'package:project_note/providers/message_provider.dart';
 import 'package:provider/provider.dart';
 
 Widget messageTile(Message messageEntry, BuildContext context) {

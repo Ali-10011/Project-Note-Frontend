@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:project_note/models/Message.dart';
+import 'package:project_note/models/message_model.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:uuid/uuid.dart';
 
@@ -42,9 +42,9 @@ class MessageProvider with ChangeNotifier {
     if (data != '' && data.isNotEmpty) {
       deletedMessagesList =
           json.decode(data).map<String>((e) => e.toString()).toSet().toList();
-      deletedMessagesList.forEach((flaggedMessage) {
+      for (var flaggedMessage in deletedMessagesList) {
         deleteMessagefromDatabase(flaggedMessage);
-      });
+      }
     } else {
       await prefs.setString(
           'deletedMessages', json.encode(deletedMessagesList));
@@ -71,7 +71,7 @@ class MessageProvider with ChangeNotifier {
   }
 
   void uploadText(Message messageInstance) async {
-    var response = await http.post(Uri.parse(API_URL), headers: {
+    var response = await http.post(Uri.parse(apiUrl), headers: {
       "Content-Type": "application/x-www-form-urlencoded"
     }, body: {
       'message': messageInstance.message,
@@ -109,7 +109,7 @@ class MessageProvider with ChangeNotifier {
 
   void deleteMessagefromDatabase(String messageID) async {
     var response = await http.delete(
-      Uri.parse("$API_URL/messages/$messageID"),
+      Uri.parse("$apiUrl/messages/$messageID"),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
     );
 
@@ -164,7 +164,7 @@ class MessageProvider with ChangeNotifier {
         allowedExtensions: ['png', 'jpg']);
 
     if (results == null) {
-      return null;
+      return;
     }
 
     final path = results.files.single.path;
@@ -213,7 +213,7 @@ class MessageProvider with ChangeNotifier {
     storage
         .uploadfile(messageInstance.path, messageInstance.id)
         .then((value) async {
-      var response = await http.post(Uri.parse(API_URL), headers: {
+      var response = await http.post(Uri.parse(apiUrl), headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       }, body: {
         'message': 'new message',
@@ -274,7 +274,7 @@ class MessageProvider with ChangeNotifier {
     storage
         .uploadVideo(messageInstance.path, messageInstance.id)
         .then((value) async {
-      var response = await http.post(Uri.parse(API_URL), headers: {
+      var response = await http.post(Uri.parse(apiUrl), headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       }, body: {
         'message': 'new message',
@@ -328,7 +328,7 @@ class MessageProvider with ChangeNotifier {
     //Getting new messages from API
 
     final response = await http.get(Uri.parse(
-      '$API_URL?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
+      '$apiUrl?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
     ));
 
     final data = json.decode(response.body) as List<dynamic>;
