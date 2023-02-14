@@ -11,10 +11,9 @@ class PhotoHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //timeDilation = 2.0;
-    return Hero(
-      tag: messageEntry.id,
-      child: Material(
-        color: Colors.transparent,
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
         child: InkWell(
             onTap: () {
               Navigator.of(context).pop();

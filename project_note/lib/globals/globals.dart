@@ -23,8 +23,8 @@ const styleMe = BubbleStyle(
   margin: BubbleEdges.only(top: 10, bottom: 10),
   shadowColor: Color.fromARGB(255, 137, 9, 223),
   elevation: 2,
+  radius: Radius.circular(18.0),
   alignment: Alignment.topRight,
-  nip: BubbleNip.rightTop,
   color: Color.fromARGB(255, 62, 173, 201),
 );
 
@@ -51,5 +51,3 @@ String dateTimeString(DateTime messageDt) {
     return todayDate;
   }
 }
-
-

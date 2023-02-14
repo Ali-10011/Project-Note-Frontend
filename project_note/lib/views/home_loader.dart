@@ -135,7 +135,7 @@ class _LoadingStateState extends State<LoadingState> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
                               CircularProgressIndicator(),
-                              Text("Loading your Messages....")
+                              Text("Setting you up.....")
                             ],
                           ),
                         );

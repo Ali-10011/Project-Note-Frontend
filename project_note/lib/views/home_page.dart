@@ -82,129 +82,130 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     _messageslist = context.watch<MessageProvider>().messages;
-    return Scaffold(
-      appBar: AppBar(
-        title: InkWell(
-          onTap: ()
-          {
-            Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ProfileHero()),
-          );
-          }, 
-          child: Hero(
-            tag: "Profile",
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(25.0),
-                child: Image.asset('assets/placeholder.png',
-                    height: 50.0, width: 50.0, fit: BoxFit.cover)),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileHero()),
+              );
+            },
+            child: Hero(
+              tag: "Profile",
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25.0),
+                  child: Image.asset('assets/placeholder.png',
+                      height: 50.0, width: 50.0, fit: BoxFit.cover)),
+            ),
           ),
+          backgroundColor: Colors.black,
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.clear_all,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                clearCache();
+                // do something
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.wifi,
+                color: (connection == ConnectionStatus.wifi)
+                    ? Colors.blue
+                    : Colors.white,
+              ),
+              onPressed: () async {
+                var connectivityResult =
+                    await (Connectivity().checkConnectivity());
+                setState(() {
+                  if (connectivityResult == ConnectivityResult.wifi) {
+                    connection = (connection == ConnectionStatus.wifi)
+                        ? ConnectionStatus.noConnection
+                        : ConnectionStatus.wifi;
+                  } else {
+                    connection = ConnectionStatus.noConnection;
+                  }
+                  if (connection == ConnectionStatus.wifi) {
+                    Provider.of<MessageProvider>(context, listen: false)
+                        .uploadOfflineMessages();
+                  }
+                });
+                // do something
+              },
+            )
+          ],
         ),
-        backgroundColor: Colors.black,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.clear_all,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              clearCache();
-              // do something
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.wifi,
-              color: (connection == ConnectionStatus.wifi)
-                  ? Colors.blue
-                  : Colors.white,
-            ),
-            onPressed: () async {
-              var connectivityResult =
-                  await (Connectivity().checkConnectivity());
-              setState(() {
-                if (connectivityResult == ConnectivityResult.wifi) {
-                  connection = (connection == ConnectionStatus.wifi)
-                      ? ConnectionStatus.noConnection
-                      : ConnectionStatus.wifi;
-                } else {
-                  connection = ConnectionStatus.noConnection;
-                }
-                if (connection == ConnectionStatus.wifi) {
-                  Provider.of<MessageProvider>(context, listen: false)
-                      .uploadOfflineMessages();
-                }
-              });
-              // do something
-            },
-          )
-        ],
-      ),
-      body: CustomScrollView(controller: controller, reverse: true, slivers: [
-        SliverToBoxAdapter(
-          child: Container(
-            child: (_messageslist.isEmpty)
-                ? const Center(child: Text('Start Typing.... '))
-                : ListView.builder(
-                    reverse: true,
-                    shrinkWrap: true,
-                    physics: const ClampingScrollPhysics(),
-                    itemCount: _messageslist.length + 1,
-                    itemBuilder: (context, i) {
-                      if (i < _messageslist.length) {
-                        if (_messageslist[i].mediatype.compareTo('image') ==
-                            0) {
-                          return InkWell(
-                              onTap: () {                             
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PhotoHero(
-                                        messageEntry: _messageslist[i],
-                                      ),
-                                    ));
-                              },
-                              child: imageTile(_messageslist[i], context));
-                        }
-                        if (_messageslist[i].mediatype.compareTo('video') ==
-                            0) {
-                          return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => VideoHero(
-                                        videoUrl: _messageslist[i].path,
-                                      ),
-                                    ));
-                              },
-                              child: videoTile(_messageslist[i], context));
+        body: CustomScrollView(controller: controller, reverse: true, slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+              child: (_messageslist.isEmpty)
+                  ? const Center(child: Text('Start Typing.... '))
+                  : ListView.builder(
+                      reverse: true,
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      itemCount: _messageslist.length + 1,
+                      itemBuilder: (context, i) {
+                        if (i < _messageslist.length) {
+                          if (_messageslist[i].mediatype.compareTo('image') ==
+                              0) {
+                            return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PhotoHero(
+                                          messageEntry: _messageslist[i],
+                                        ),
+                                      ));
+                                },
+                                child: imageTile(_messageslist[i], context));
+                          }
+                          if (_messageslist[i].mediatype.compareTo('video') ==
+                              0) {
+                            return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VideoHero(
+                                          videoUrl: _messageslist[i].path,
+                                        ),
+                                      ));
+                                },
+                                child: videoTile(_messageslist[i], context));
+                          } else {
+                            return (messageTile(_messageslist[i], context));
+                          }
+                        } else if (isLastPage ||
+                            connection == ConnectionStatus.noConnection) {
+                          return const Padding(
+                            padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
+                            child: Divider(
+                              height: 1,
+                              thickness: 5,
+                            ),
+                          );
                         } else {
-                          return (messageTile(_messageslist[i], context));
+                          Provider.of<MessageProvider>(context, listen: false)
+                              .getMessages();
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 32),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
                         }
-                      } else if (isLastPage ||
-                          connection == ConnectionStatus.noConnection) {
-                        return const Padding(
-                          padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
-                          child: Divider(
-                            height: 1,
-                            thickness: 5,
-                          ),
-                        );
-                      } else {
-                        Provider.of<MessageProvider>(context, listen: false)
-                            .getMessages();
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                    }),
+                      }),
+            ),
           ),
-        ),
-      ]),
-      bottomNavigationBar: const BottomBar(),
+        ]),
+        bottomNavigationBar: const BottomBar(),
+      ),
     );
   }
 }

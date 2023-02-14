@@ -17,9 +17,10 @@ Widget imageTile(Message messageEntry, BuildContext context) {
       contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0),
       title: Container(
           margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
-          color: Colors.white,
           height: screenHeight * 0.3,
-          child: isImageValid(messageEntry)),
+          child: ClipRRect(
+              borderRadius: BorderRadius.circular(25.0),
+              child: isImageValid(messageEntry))),
       subtitle: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -30,8 +31,9 @@ Widget imageTile(Message messageEntry, BuildContext context) {
             ),
             const SizedBox(width: 10),
             Icon(
-                (messageEntry.isUploaded == 'true') ? Icons.check : Icons.error,
-                size: 12),
+              (messageEntry.isUploaded == 'true') ? Icons.check : Icons.error,
+              size: 12,
+            ),
           ]),
           IconButton(
             padding: const EdgeInsets.all(0),
@@ -49,19 +51,16 @@ Widget imageTile(Message messageEntry, BuildContext context) {
 }
 
 Widget isImageValid(Message messageEntry) {
-  try 
-  {
-  if (messageEntry.isUploaded == 'true') {
-    return CachedNetworkImage(
-        key: UniqueKey(),
-        imageUrl: messageEntry.path.toString(),
-        fit: BoxFit.cover);
-  } else {
-    return Image.file(File(messageEntry.path), fit: BoxFit.cover);
-  }
-  }
-  catch (e)
-  {
+  try {
+    if (messageEntry.isUploaded == 'true') {
+      return CachedNetworkImage(
+          key: UniqueKey(),
+          imageUrl: messageEntry.path.toString(),
+          fit: BoxFit.cover);
+    } else {
+      return Image.file(File(messageEntry.path), fit: BoxFit.cover);
+    }
+  } catch (e) {
     return Image.asset('assets/placeholder.png');
   }
 }

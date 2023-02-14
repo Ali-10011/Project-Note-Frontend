@@ -73,8 +73,7 @@ class _BottomBarState extends State<BottomBar> {
               MaterialPageRoute(
                 builder: (context) => TakePictureScreen(camera: firstCamera),
               ));
-        }
-        else if (text == "Video") {
+        } else if (text == "Video") {
           try {
             Provider.of<MessageProvider>(context, listen: false).sendVideo();
           } on Exception catch (e) {
@@ -120,54 +119,66 @@ class _BottomBarState extends State<BottomBar> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-                //padding: EdgeInsets.all(0.0),
-                onPressed: () {
-                  showModalBottomSheet(
-                      backgroundColor: Colors.transparent,
-                      context: context,
-                      builder: (builder) => bottomSheet());
-                },
-                icon: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                )),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.75,
-              child: TextField(
-                controller: _messagecontroller,
-                maxLines: 3,
-                minLines: 1,
-                keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      _messagecontroller.clear();
-                    },
-                    icon: const Icon(Icons.clear),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.grey,
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Material(
+        elevation: 20,
+        child: Container(
+          padding: const EdgeInsets.only(top: 10),
+          color: Colors.black,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                  //padding: EdgeInsets.all(0.0),
+                  onPressed: () {
+                    showModalBottomSheet(
+                        backgroundColor: Colors.transparent,
+                        context: context,
+                        builder: (builder) => bottomSheet());
+                  },
+                  icon: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                  )),
+              SizedBox(
+                width: screenWidth * 0.75,
+                child: TextField(
+                  controller: _messagecontroller,
+                  maxLines: 3,
+                  minLines: 1,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        _messagecontroller.clear();
+                      },
+                      icon: const Icon(Icons.clear),
                     ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: const BorderSide(
+                        width: 1.1,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    border: const OutlineInputBorder(),
+                    hintText: 'Enter Text',
                   ),
-                  border: const OutlineInputBorder(),
-                  hintText: 'Enter Text',
                 ),
               ),
-            ),
-            IconButton(
-                onPressed: sendMessage,
-                icon: const Icon(
-                  Icons.send,
-                  color: Colors.blueAccent,
-                ))
-          ],
-        ));
+              IconButton(
+                  onPressed: () {
+                    sendMessage();
+                  },
+                  icon: const Icon(
+                    Icons.send,
+                    color: Colors.blueAccent,
+                  ))
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -112,8 +112,6 @@ class MessageProvider with ChangeNotifier {
       Uri.parse("$apiUrl/$messageID"),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
     );
-    print(response.body);
-
     switch (response.statusCode) {
       case 200:
         {
