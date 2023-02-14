@@ -155,20 +155,17 @@ class _HomeState extends State<Home> {
                       if (i < _messageslist.length) {
                         if (_messageslist[i].mediatype.compareTo('image') ==
                             0) {
-                          return Hero(
-                            tag: _messageslist[i].id,
-                            child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PhotoHero(
-                                          messageEntry: _messageslist[i],
-                                        ),
-                                      ));
-                                },
-                                child: imageTile(_messageslist[i], context)),
-                          );
+                          return InkWell(
+                              onTap: () {                             
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PhotoHero(
+                                        messageEntry: _messageslist[i],
+                                      ),
+                                    ));
+                              },
+                              child: imageTile(_messageslist[i], context));
                         }
                         if (_messageslist[i].mediatype.compareTo('video') ==
                             0) {

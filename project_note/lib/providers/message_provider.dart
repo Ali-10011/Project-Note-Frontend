@@ -85,7 +85,7 @@ class MessageProvider with ChangeNotifier {
         {
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
           int messageindex = messageslist.indexOf(messageInstance);
-          messageslist[messageindex] = Message.fromJson(jsonDecode['result']);
+          messageslist[messageindex] = Message.fromJson(jsonDecode);
 
           saveMessages();
         }
@@ -109,20 +109,15 @@ class MessageProvider with ChangeNotifier {
 
   void deleteMessagefromDatabase(String messageID) async {
     var response = await http.delete(
-      Uri.parse("$apiUrl/messages/$messageID"),
+      Uri.parse("$apiUrl/$messageID"),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
     );
+    print(response.body);
 
     switch (response.statusCode) {
       case 200:
         {
-          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-
-          if (jsonDecode['deletedCount'] == 0) {
-            flagforDeletion(messageID);
-          } else {
-            removeflagforDeletion(messageID);
-          }
+          removeflagforDeletion(messageID);
         }
         break;
       case 404:
@@ -224,11 +219,13 @@ class MessageProvider with ChangeNotifier {
 
       switch (response.statusCode) {
         case 200:
-          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-          int messageIndex = messageslist.indexOf(messageInstance);
-          messageslist[messageIndex] = Message.fromJson(jsonDecode['result']);
-          saveMessages();
-          break;
+          {
+            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+            int messageIndex = messageslist.indexOf(messageInstance);
+            messageslist[messageIndex] = Message.fromJson(jsonDecode);
+            saveMessages();
+            break;
+          }
         case 404:
           throw ("Cannot Find The Requested Resource");
         default:
@@ -285,11 +282,14 @@ class MessageProvider with ChangeNotifier {
 
       switch (response.statusCode) {
         case 200:
-          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-          int messageIndex = messageslist.indexOf(messageInstance);
-          messageslist[messageIndex] = Message.fromJson(jsonDecode['result']);
-          saveMessages();
-          break;
+          {
+            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+            int messageIndex = messageslist.indexOf(messageInstance);
+            messageslist[messageIndex] = Message.fromJson(jsonDecode);
+            saveMessages();
+
+            break;
+          }
         case 404:
           throw ("Cannot Find The Requested Resource");
         default:

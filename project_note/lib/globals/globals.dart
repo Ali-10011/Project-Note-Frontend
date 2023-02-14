@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 bool isLastPage = false;
 const int loadPerPage = 15;
 
-const String apiUrl = 'http://localhost:3000/home';
+const String apiUrl = 'http://localhost:3000/api/home/messages';
 Storage storage = Storage();
 var connection;
 
