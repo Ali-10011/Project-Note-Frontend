@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:project_note/models/message_model.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:uuid/uuid.dart';
+import 'package:project_note/models/credentials_model.dart';
 
 class MessageProvider with ChangeNotifier {
   List<Message> messageslist = [];
@@ -49,6 +50,7 @@ class MessageProvider with ChangeNotifier {
       await prefs.setString(
           'deletedMessages', json.encode(deletedMessagesList));
     }
+    return;
   }
 
   Future<void> sendMessage(String messageEntry) async {
@@ -71,8 +73,12 @@ class MessageProvider with ChangeNotifier {
   }
 
   void uploadText(Message messageInstance) async {
+    UserCredentials credentialsInstance = UserCredentials();
+    String? token = await credentialsInstance.readToken();
+
     var response = await http.post(Uri.parse(apiUrl), headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
+      "Content-Type": "application/x-www-form-urlencoded",
+      'Authorization': 'Bearer $token'
     }, body: {
       'message': messageInstance.message,
       'path': messageInstance.path,
@@ -108,9 +114,15 @@ class MessageProvider with ChangeNotifier {
   }
 
   void deleteMessagefromDatabase(String messageID) async {
+    UserCredentials credentialsInstance = UserCredentials();
+    String? token = await credentialsInstance.readToken();
+
     var response = await http.delete(
       Uri.parse("$apiUrl/$messageID"),
-      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token'
+      },
     );
     switch (response.statusCode) {
       case 200:
@@ -202,12 +214,16 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-  void uploadImage(Message messageInstance) {
+  Future<void> uploadImage(Message messageInstance) async {
+    UserCredentials credentialsInstance = UserCredentials();
+    String? token = await credentialsInstance.readToken();
+
     storage
         .uploadfile(messageInstance.path, messageInstance.id)
         .then((value) async {
       var response = await http.post(Uri.parse(apiUrl), headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        'Authorization': 'Bearer $token'
       }, body: {
         'message': 'new message',
         'path': value,
@@ -265,12 +281,15 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-  void uploadVideo(Message messageInstance) {
+  Future<void> uploadVideo(Message messageInstance) async {
+    UserCredentials credentialsInstance = UserCredentials();
+    String? token = await credentialsInstance.readToken();
     storage
         .uploadVideo(messageInstance.path, messageInstance.id)
         .then((value) async {
       var response = await http.post(Uri.parse(apiUrl), headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        'Authorization': 'Bearer $token'
       }, body: {
         'message': 'new message',
         'path': value,
@@ -324,10 +343,17 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> getMessages() async {
     //Getting new messages from API
+    UserCredentials credentialsInstance = UserCredentials();
+    String? token = await credentialsInstance.readToken();
 
-    final response = await http.get(Uri.parse(
-      '$apiUrl?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}',
-    ));
+    final response = await http.get(
+        Uri.parse(
+            '$apiUrl?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
 
     final data = json.decode(response.body) as List<dynamic>;
     if (data.isEmpty) {

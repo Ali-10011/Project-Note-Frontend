@@ -39,6 +39,7 @@ dependencies:
   http:
   bubble:
   flutter_spinkit:
+  flutter_secure_storage:
   intl:
   firebase_core: ^1.22.0
   firebase_storage: ^10.3.8

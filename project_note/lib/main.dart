@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-//import 'package:project_note/views/authentication_page.dart';
+import 'package:project_note/views/authentication_page.dart';
 import 'package:project_note/views/home_page.dart';
 import 'package:project_note/views/home_loader.dart';
 import 'firebase_options.dart';
@@ -35,9 +35,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.dark(),
       title: 'Note',
-      initialRoute: '/initial',
+      initialRoute: '/auth',
       routes: {
-        //'/auth': (context) => const Auth(),
+        '/auth': (context) => const Auth(),
         '/home': (context) => const Home(),
         '/initial': (context) => const LoadingState(),
       },

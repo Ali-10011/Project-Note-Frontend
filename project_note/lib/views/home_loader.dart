@@ -46,13 +46,16 @@ class _LoadingStateState extends State<LoadingState> {
   void setConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     
-    if (connectivityResult == ConnectivityResult.mobile) {
+    setState(() {
+      if (connectivityResult == ConnectivityResult.mobile) {
         connection = ConnectionStatus.mobileNetwork;
       } else if (connectivityResult == ConnectivityResult.wifi) {
         connection = ConnectionStatus.wifi;
       } else {
         connection = ConnectionStatus.noConnection;
       }
+    });
+    
     }
 
   
