@@ -13,18 +13,23 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> {
   late final TextEditingController _usernamecontroller =
-      TextEditingController();
-  final TextEditingController _passwordcontroller = TextEditingController();
+      TextEditingController(text: "Testuser");
+  final TextEditingController _passwordcontroller =
+      TextEditingController(text: "test123");
 
   bool _hidepassword = true;
-  bool _usernamebuttonenabled = false;
-  bool _passwordbuttonenabled = false;
+  bool _usernamebuttonenabled = true;
+  bool _passwordbuttonenabled = true;
   String _warningmessage = '';
   bool _isLoading = false;
 
   @override
   initState() {
     super.initState();
+  }
+
+  void _pushLoadingPage() {
+    Navigator.of(context).pushReplacementNamed('/initial');
   }
 
   @override
@@ -186,7 +191,8 @@ class _AuthState extends State<Auth> {
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
           UserCredentials credentialsInstance = UserCredentials();
           credentialsInstance.saveToken(jsonDecode['token']);
-
+          credentialsInstance.setUsername(username);
+          _pushLoadingPage();
           break;
         default:
           setState(() {
@@ -196,7 +202,11 @@ class _AuthState extends State<Auth> {
     } catch (e) {
       //Report Error to User
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+        content: Text(
+          e.toString(),
+          style: const TextStyle(color: Colors.white),
+        ),
       ));
     }
     setState(() {
@@ -211,11 +221,18 @@ class _AuthState extends State<Auth> {
           headers: {"Content-Type": "application/x-www-form-urlencoded"},
           body: {'username': username, 'password': password});
       switch (response.statusCode) {
-        case 200:
+        case 201: //201 means a new user was created
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
           UserCredentials credentialsInstance = UserCredentials();
           credentialsInstance.saveToken(jsonDecode['token']);
+          credentialsInstance.setUsername(username);
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Sign up Successful",
+                style: TextStyle(color: Colors.white)),
+          ));
 
+          _pushLoadingPage();
           break;
         default:
           setState(() {
@@ -225,7 +242,9 @@ class _AuthState extends State<Auth> {
     } catch (e) {
       //Report Error to User
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+        content:
+            Text(e.toString(), style: const TextStyle(color: Colors.white)),
       ));
     }
     setState(() {

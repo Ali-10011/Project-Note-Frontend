@@ -59,8 +59,8 @@ class MessageProvider with ChangeNotifier {
     var newMessageID = uuid.v1();
     Message newInstance = Message(
         id: newMessageID.toString(),
-        username:
-            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+        username: credentialsInstance
+            .getUsername(), //hardcoding it for now, will need to make it dynamic in the future
         datetime: DateTime.now().toString(),
         mediatype: 'text',
         message: messageEntry,
