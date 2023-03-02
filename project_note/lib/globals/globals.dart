@@ -1,15 +1,17 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:project_note/models/credentials_model.dart';
 import 'package:project_note/models/firebase_storage.dart';
 import 'package:intl/intl.dart';
 
-//List<Message> messageslist = [];
 bool isLastPage = false;
 const int loadPerPage = 15;
 
 const String apiUrl = 'http://localhost:3000/api/home/messages';
+UserCredentials credentialsInstance = UserCredentials();
+
 Storage storage = Storage();
-var connection;
+ConnectionStatus? connection;
 
 enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 

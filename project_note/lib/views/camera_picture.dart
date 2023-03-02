@@ -66,7 +66,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             final image = await _controller.takePicture();
 
             if (!mounted) return;
-            if (image == null) return;
+            //if (image == null) return;
 
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -81,7 +81,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                 builder: (context) => ErrPage(statusCode: e.toString()),
               ),
             );
-          
           }
         },
         child: const Icon(Icons.camera_alt),

@@ -41,8 +41,8 @@ dependencies:
   flutter_spinkit:
   flutter_secure_storage:
   intl:
-  firebase_core: ^1.22.0
-  firebase_storage: ^10.3.8
+  firebase_core: ^2.6.1
+  firebase_storage: ^11.0.13
   file_picker:
   cached_network_image:
   shared_preferences:

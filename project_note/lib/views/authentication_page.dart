@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_note/models/credentials_model.dart';
@@ -15,10 +15,13 @@ class _AuthState extends State<Auth> {
   late final TextEditingController _usernamecontroller =
       TextEditingController();
   final TextEditingController _passwordcontroller = TextEditingController();
+
   bool _hidepassword = true;
   bool _usernamebuttonenabled = false;
   bool _passwordbuttonenabled = false;
   String _warningmessage = '';
+  bool _isLoading = false;
+
   @override
   initState() {
     super.initState();
@@ -131,29 +134,41 @@ class _AuthState extends State<Auth> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                  onPressed: (_usernamebuttonenabled && _passwordbuttonenabled)
-                      ? () {
-                          loginUser(_usernamecontroller.value.text.toString(),
-                              _passwordcontroller.value.text.toString());
-                        }
-                      : null,
-                  child: const Text('Log in')),
-              const SizedBox(
-                width: 10,
-              ),
-              ElevatedButton(
-                  onPressed: (_usernamebuttonenabled && _passwordbuttonenabled)
-                      ? () {
-                          registerUser(
-                              _usernamecontroller.value.text.toString(),
-                              _passwordcontroller.value.text.toString());
-                        }
-                      : null,
-                 
-                  child: const Text('Sign up')),
-            ],
+            children: _isLoading
+                ? [const CircularProgressIndicator()]
+                : [
+                    ElevatedButton(
+                        onPressed: (_usernamebuttonenabled &&
+                                _passwordbuttonenabled)
+                            ? () {
+                                setState(() {
+                                  _isLoading = true;
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                });
+                                loginUser(
+                                    _usernamecontroller.value.text.toString(),
+                                    _passwordcontroller.value.text.toString());
+                              }
+                            : null,
+                        child: const Text('Log in')),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    ElevatedButton(
+                        onPressed: (_usernamebuttonenabled &&
+                                _passwordbuttonenabled)
+                            ? () {
+                                setState(() {
+                                  _isLoading = true;
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                });
+                                registerUser(
+                                    _usernamecontroller.value.text.toString(),
+                                    _passwordcontroller.value.text.toString());
+                              }
+                            : null,
+                        child: const Text('Sign up')),
+                  ],
           ),
         ]),
       ),
@@ -179,8 +194,14 @@ class _AuthState extends State<Auth> {
           });
       }
     } catch (e) {
-      throw Error;
+      //Report Error to User
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+      ));
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> registerUser(String username, String password) async {
@@ -194,6 +215,7 @@ class _AuthState extends State<Auth> {
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
           UserCredentials credentialsInstance = UserCredentials();
           credentialsInstance.saveToken(jsonDecode['token']);
+
           break;
         default:
           setState(() {
@@ -201,7 +223,13 @@ class _AuthState extends State<Auth> {
           });
       }
     } catch (e) {
-      throw Error;
+      //Report Error to User
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+      ));
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 }

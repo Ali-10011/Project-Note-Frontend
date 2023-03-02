@@ -11,6 +11,7 @@ import 'package:project_note/models/credentials_model.dart';
 class MessageProvider with ChangeNotifier {
   List<Message> messageslist = [];
   List<String> deletedMessagesList = [];
+
   List<Message> get messages {
     return [...messageslist];
   }
@@ -114,7 +115,6 @@ class MessageProvider with ChangeNotifier {
   }
 
   void deleteMessagefromDatabase(String messageID) async {
-    UserCredentials credentialsInstance = UserCredentials();
     String? token = await credentialsInstance.readToken();
 
     var response = await http.delete(
@@ -215,7 +215,6 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> uploadImage(Message messageInstance) async {
-    UserCredentials credentialsInstance = UserCredentials();
     String? token = await credentialsInstance.readToken();
 
     storage
@@ -282,7 +281,6 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> uploadVideo(Message messageInstance) async {
-    UserCredentials credentialsInstance = UserCredentials();
     String? token = await credentialsInstance.readToken();
     storage
         .uploadVideo(messageInstance.path, messageInstance.id)
@@ -343,7 +341,6 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> getMessages() async {
     //Getting new messages from API
-    UserCredentials credentialsInstance = UserCredentials();
     String? token = await credentialsInstance.readToken();
 
     final response = await http.get(
