@@ -18,6 +18,8 @@ enum ConnectionStatus { wifi, mobileNetwork, noConnection }
 double screenWidth = 0;
 double screenHeight = 0;
 
+late String sessionUserName;
+
 // ignore: prefer_typing_uninitialized_variables
 late final firstCamera;
 

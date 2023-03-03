@@ -16,6 +16,14 @@ class MessageProvider with ChangeNotifier {
     return [...messageslist];
   }
 
+  void deleteAllMessages() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.remove('deletedMessages');
+    await preferences.remove('messages');
+    messageslist.clear();
+    deletedMessagesList.clear();
+  }
+
   Future<void> uploadOfflineMessages() async {
     if (messageslist.isEmpty) {
       await loadMessages();
@@ -38,6 +46,7 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> deleteFlaggedMessages() async {
+//Deletes all messages that are in deleted Messages List
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('deletedMessages') ?? '';
 
@@ -59,8 +68,8 @@ class MessageProvider with ChangeNotifier {
     var newMessageID = uuid.v1();
     Message newInstance = Message(
         id: newMessageID.toString(),
-        username: credentialsInstance
-            .getUsername(), //hardcoding it for now, will need to make it dynamic in the future
+        username:
+            sessionUserName, //hardcoding it for now, will need to make it dynamic in the future
         datetime: DateTime.now().toString(),
         mediatype: 'text',
         message: messageEntry,
@@ -199,7 +208,7 @@ class MessageProvider with ChangeNotifier {
     Message newInstance = Message(
         id: newfilename.toString(),
         username:
-            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+            sessionUserName, //hardcoding it for now, will need to make it dynamic in the future
         datetime: DateTime.now().toString(),
         mediatype: 'image',
         message: 'new message',
@@ -265,7 +274,7 @@ class MessageProvider with ChangeNotifier {
     Message newInstance = Message(
         id: newfilename.toString(),
         username:
-            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+            sessionUserName, //hardcoding it for now, will need to make it dynamic in the future
         datetime: DateTime.now().toString(),
         mediatype: 'video',
         message: 'new message',
@@ -324,6 +333,7 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> loadMessages() async {
     //Load Messages from mobile storage
+
     final prefs = await SharedPreferences.getInstance();
 
     final data = prefs.getString('messages') ?? '';

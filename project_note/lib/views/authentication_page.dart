@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/credentials_model.dart';
 
 class Auth extends StatefulWidget {
@@ -13,7 +14,7 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> {
   late final TextEditingController _usernamecontroller =
-      TextEditingController(text: "Testuser");
+      TextEditingController(text: "TestuserE");
   final TextEditingController _passwordcontroller =
       TextEditingController(text: "test123");
 
@@ -188,12 +189,14 @@ class _AuthState extends State<Auth> {
           body: {'username': username, 'password': password});
       switch (response.statusCode) {
         case 200:
-          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-          UserCredentials credentialsInstance = UserCredentials();
-          credentialsInstance.saveToken(jsonDecode['token']);
-          credentialsInstance.setUsername(username);
-          _pushLoadingPage();
-          break;
+          {
+            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+            UserCredentials credentialsInstance = UserCredentials();
+            credentialsInstance.saveToken(jsonDecode['token']);
+            sessionUserName = username;
+            _pushLoadingPage();
+            break;
+          }
         default:
           setState(() {
             _warningmessage = response.body.toString();
@@ -222,18 +225,20 @@ class _AuthState extends State<Auth> {
           body: {'username': username, 'password': password});
       switch (response.statusCode) {
         case 201: //201 means a new user was created
-          Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-          UserCredentials credentialsInstance = UserCredentials();
-          credentialsInstance.saveToken(jsonDecode['token']);
-          credentialsInstance.setUsername(username);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            backgroundColor: Colors.green,
-            content: Text("Sign up Successful",
-                style: TextStyle(color: Colors.white)),
-          ));
+          {
+            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+            UserCredentials credentialsInstance = UserCredentials();
+            credentialsInstance.saveToken(jsonDecode['token']);
+            sessionUserName = username;
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              backgroundColor: Colors.green,
+              content: Text("Sign up Successful",
+                  style: TextStyle(color: Colors.white)),
+            ));
 
-          _pushLoadingPage();
-          break;
+            _pushLoadingPage();
+            break;
+          }
         default:
           setState(() {
             _warningmessage = response.body.toString();

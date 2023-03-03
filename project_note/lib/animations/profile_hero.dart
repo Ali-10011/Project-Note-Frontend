@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:project_note/globals/globals.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/message_provider.dart';
 
 class ProfileHero extends StatefulWidget {
   const ProfileHero({super.key});
@@ -11,6 +14,15 @@ class ProfileHero extends StatefulWidget {
 
 class _ProfileHeroState extends State<ProfileHero> {
   bool isLoading = false;
+  Future<void> _doLogoutActivities() async {
+    credentialsInstance.deleteToken();
+    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     timeDilation = 1.0;
@@ -30,12 +42,13 @@ class _ProfileHeroState extends State<ProfileHero> {
                     backgroundImage: AssetImage('assets/placeholder.png'),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 8.0, 0.0, 8.0),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8.0, 0.0, 8.0),
                   child: Center(
                       child: Text(
-                    'Ali Hussnain',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
+                    sessionUserName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 26),
                   )),
                 ),
                 const Divider(thickness: 3.0, height: 30),
@@ -56,16 +69,11 @@ class _ProfileHeroState extends State<ProfileHero> {
                             backgroundColor:
                                 MaterialStateProperty.all(Colors.red),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             setState(() {
                               isLoading = true;
-
-                              credentialsInstance.logoutUser();
-                              Future.delayed(const Duration(seconds: 2), () {
-                                Navigator.of(context).pushNamedAndRemoveUntil(
-                                    '/auth', (Route<dynamic> route) => false);
-                              });
                             });
+                            _doLogoutActivities();
                           },
                           icon: const Icon(Icons.logout_rounded),
                           label: const Text('Logout')),
