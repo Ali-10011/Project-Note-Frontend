@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
 import 'package:project_note/views/camera_picture.dart';
-import 'package:project_note/views/err_page.dart';
 import 'package:provider/provider.dart';
 
 class BottomBar extends StatefulWidget {
@@ -14,6 +13,26 @@ class BottomBar extends StatefulWidget {
 
 class _BottomBarState extends State<BottomBar> {
   late final TextEditingController _messagecontroller = TextEditingController();
+  void _fireSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: color,
+      content: Text(
+        message.toString(),
+        style: const TextStyle(color: Colors.white),
+      ),
+    ));
+  }
+
+  Future<void> _doForcedLogoutActivities() async {
+    credentialsInstance.deleteToken();
+    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
+    _fireSnackBar("Session Expired !", Colors.red);
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
+    });
+  }
+
   Widget bottomSheet() {
     return SizedBox(
       height: screenHeight / 3,
@@ -47,9 +66,17 @@ class _BottomBarState extends State<BottomBar> {
     );
   }
 
-  Future<void> sendMessage() async {
-    Provider.of<MessageProvider>(context, listen: false)
-        .sendMessage(_messagecontroller.value.text.toString());
+  void sendMessage() async {
+    try {
+      await Provider.of<MessageProvider>(context, listen: false)
+          .sendMessage(_messagecontroller.value.text.toString());
+    } catch (e) {
+      if (e.toString() == "401") {
+        _doForcedLogoutActivities();
+      } else {
+        _fireSnackBar("Error ${e.toString()} occurred", Colors.red);
+      }
+    }
     _messagecontroller.clear();
   }
 
@@ -57,36 +84,32 @@ class _BottomBarState extends State<BottomBar> {
     return InkWell(
       onTap: () async {
         Navigator.pop(context);
-        if (text == 'Image') {
-          try {
-            Provider.of<MessageProvider>(context, listen: false).sendImage();
-          } on Exception catch (e) {
-            Navigator.pushReplacement(
+        try {
+          if (text == 'Image') {
+            await Provider.of<MessageProvider>(context, listen: false)
+                .sendImage();
+          } else if (text == "Camera") {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ErrPage(statusCode: e.toString()),
+                  builder: (context) => TakePictureScreen(camera: firstCamera),
                 ));
+          } else if (text == "Video") {
+            await Provider.of<MessageProvider>(context, listen: false)
+                .sendVideo();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Feature under Development!"),
+            ));
           }
-        } else if (text == "Camera") {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TakePictureScreen(camera: firstCamera),
-              ));
-        } else if (text == "Video") {
-          try {
-            Provider.of<MessageProvider>(context, listen: false).sendVideo();
-          } on Exception catch (e) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ErrPage(statusCode: e.toString()),
-                ));
+        } catch (e) {
+          if (e.toString() == "401") {
+            _doForcedLogoutActivities();
+          } else if (e.toString() == "200") {
+            _fireSnackBar("SuccessFully Uploaded", Colors.green);
+          } else {
+            _fireSnackBar("Error Code: ${e.toString()} occurred", Colors.red);
           }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Feature under Development!"),
-          ));
         }
       },
       child: Column(

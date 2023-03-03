@@ -90,16 +90,41 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 }
 
 // A widget that displays the picture taken by the user.
-class DisplayPictureScreen extends StatelessWidget {
+class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
 
   const DisplayPictureScreen({super.key, required this.imagePath});
 
   @override
+  State<DisplayPictureScreen> createState() => _DisplayPictureScreenState();
+}
+
+class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
+  void _fireSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: Colors.red,
+      content: Text(
+        message.toString(),
+        style: const TextStyle(color: Colors.white),
+      ),
+    ));
+  }
+
+  Future<void> _doForcedLogoutActivities() async {
+    credentialsInstance.deleteToken();
+    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
+    _fireSnackBar("Session Expired !");
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Display the Picture')),
-        body: Image.file(File(imagePath)),
+        body: Image.file(File(widget.imagePath)),
         floatingActionButton:
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           FloatingActionButton(
@@ -116,10 +141,19 @@ class DisplayPictureScreen extends StatelessWidget {
           ),
           FloatingActionButton(
             heroTag: null,
-            onPressed: () {
-              Provider.of<MessageProvider>(context, listen: false)
-                  .sendCameraImage(imagePath);
-              Navigator.of(context).pop();
+            onPressed: () async {
+              try {
+                await Provider.of<MessageProvider>(context, listen: false)
+                    .sendCameraImage(widget.imagePath);
+              } catch (e) {
+                if (e.toString() == "401") {
+                  _doForcedLogoutActivities();
+                } else if (e.toString() == "200") {
+                  Navigator.of(context).pop();
+                } else {
+                  _fireSnackBar("Error Code : ${e.toString()} Occurred");
+                }
+              }
             },
             child: const Icon(Icons.check),
           )

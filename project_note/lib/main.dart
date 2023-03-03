@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/auth': (context) => const Auth(),
         '/home': (context) => const Home(),
         '/initial': (context) => const LoadingState(),
+        
       },
       debugShowCheckedModeBanner: false,
     );

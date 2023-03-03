@@ -24,29 +24,35 @@ class MessageProvider with ChangeNotifier {
     deletedMessagesList.clear();
   }
 
-  Future<void> uploadOfflineMessages() async {
-    if (messageslist.isEmpty) {
-      await loadMessages();
+  Future<String?> uploadOfflineMessages() async {
+    try {
+      if (messageslist.isEmpty) {
+        await loadMessages();
+      }
+      if (messageslist.isNotEmpty) {
+        messageslist
+            .where((message) => (message.isUploaded == "false"))
+            .forEach((offlineMessage) async {
+          if (offlineMessage.mediatype == 'text') {
+            await uploadText(offlineMessage);
+          } else if (offlineMessage.mediatype == 'image') {
+            await uploadImage(offlineMessage);
+          } else if (offlineMessage.mediatype == 'video') {
+            await uploadVideo(offlineMessage);
+          }
+        });
+      } else if (connection == ConnectionStatus.wifi) {
+        await getMessages();
+      }
+    } catch (e) {
+      throw (e);
     }
-    if (messageslist.isNotEmpty) {
-      messageslist
-          .where((message) => (message.isUploaded == "false"))
-          .forEach((offlineMessage) async {
-        if (offlineMessage.mediatype == 'text') {
-          uploadText(offlineMessage);
-        } else if (offlineMessage.mediatype == 'image') {
-          uploadImage(offlineMessage);
-        } else if (offlineMessage.mediatype == 'video') {
-          uploadVideo(offlineMessage);
-        }
-      });
-    } else if (connection == ConnectionStatus.wifi) {
-      await getMessages();
-    }
+    return null;
   }
 
-  Future<void> deleteFlaggedMessages() async {
+  Future<String?> deleteFlaggedMessages() async {
 //Deletes all messages that are in deleted Messages List
+
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('deletedMessages') ?? '';
 
@@ -54,16 +60,20 @@ class MessageProvider with ChangeNotifier {
       deletedMessagesList =
           json.decode(data).map<String>((e) => e.toString()).toSet().toList();
       for (var flaggedMessage in deletedMessagesList) {
-        deleteMessagefromDatabase(flaggedMessage);
+        try {
+          await deleteMessagefromDatabase(flaggedMessage);
+        } catch (e) {
+          throw (e.toString());
+        }
       }
     } else {
       await prefs.setString(
           'deletedMessages', json.encode(deletedMessagesList));
     }
-    return;
+    return null;
   }
 
-  Future<void> sendMessage(String messageEntry) async {
+  Future<String?> sendMessage(String messageEntry) async {
     var uuid = const Uuid();
     var newMessageID = uuid.v1();
     Message newInstance = Message(
@@ -76,13 +86,19 @@ class MessageProvider with ChangeNotifier {
         path: '',
         isUploaded: 'false');
     messageslist.insert(0, newInstance);
-    saveMessages();
-    if (connection == ConnectionStatus.wifi) {
-      uploadText(newInstance);
+
+    try {
+      saveMessages();
+      if (connection == ConnectionStatus.wifi) {
+        await uploadText(newInstance);
+      }
+    } catch (e) {
+      throw (e);
     }
+    return null;
   }
 
-  void uploadText(Message messageInstance) async {
+  Future<String?> uploadText(Message messageInstance) async {
     UserCredentials credentialsInstance = UserCredentials();
     String? token = await credentialsInstance.readToken();
 
@@ -102,15 +118,16 @@ class MessageProvider with ChangeNotifier {
           Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
           int messageindex = messageslist.indexOf(messageInstance);
           messageslist[messageindex] = Message.fromJson(jsonDecode);
-
           saveMessages();
         }
         break;
-      case 404:
-        throw ("Cannot Find The Requested Resource");
+      case 401:
+        throw ("401");
+
       default:
-        throw (response.statusCode.toString());
+        throw (response.statusCode);
     }
+    return null;
   }
 
   void deleteMessage(Message messageInstance) {
@@ -123,7 +140,7 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
-  void deleteMessagefromDatabase(String messageID) async {
+  Future<String?> deleteMessagefromDatabase(String messageID) async {
     String? token = await credentialsInstance.readToken();
 
     var response = await http.delete(
@@ -139,6 +156,8 @@ class MessageProvider with ChangeNotifier {
           removeflagforDeletion(messageID);
         }
         break;
+      case 201:
+        throw (201);
       case 404:
         {
           flagforDeletion(messageID);
@@ -151,6 +170,7 @@ class MessageProvider with ChangeNotifier {
           throw (response.statusCode.toString());
         }
     }
+    return null;
   }
 
   void flagforDeletion(String messageID) async {
@@ -168,7 +188,7 @@ class MessageProvider with ChangeNotifier {
     prefs.setString('deletedMessages', json.encode(deletedMessagesList));
   }
 
-  Future<void> sendImage() async {
+  Future<String?> sendImage() async {
     var uuid = const Uuid();
     var newfilename = uuid.v1();
 
@@ -178,7 +198,7 @@ class MessageProvider with ChangeNotifier {
         allowedExtensions: ['png', 'jpg']);
 
     if (results == null) {
-      return;
+      return null;
     }
 
     final path = results.files.single.path;
@@ -186,7 +206,7 @@ class MessageProvider with ChangeNotifier {
     Message newInstance = Message(
         id: newfilename.toString(),
         username:
-            'Lucifer', //hardcoding it for now, will need to make it dynamic in the future
+            sessionUserName, //hardcoding it for now, will need to make it dynamic in the future
         datetime: DateTime.now().toString(),
         mediatype: 'image',
         message: 'new message',
@@ -197,11 +217,53 @@ class MessageProvider with ChangeNotifier {
     saveMessages();
 
     if (connection == ConnectionStatus.wifi) {
-      uploadImage(newInstance);
+      try {
+        await uploadImage(newInstance);
+      } catch (e) {
+        throw (e.toString());
+      }
     }
+    return null;
   }
 
-  Future<void> sendCameraImage(String imagePath) async {
+  Future<String?> uploadImage(Message messageInstance) async {
+    String? token = await credentialsInstance.readToken();
+    try {
+      await storage
+          .uploadfile(messageInstance.path, messageInstance.id)
+          .then((value) async {
+        var response = await http.post(Uri.parse(apiUrl), headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          'Authorization': 'Bearer $token'
+        }, body: {
+          'message': 'new message',
+          'path': value,
+          'dateTime': messageInstance.datetime,
+          'mediatype': 'image'
+        });
+
+        switch (response.statusCode) {
+          case 200:
+            {
+              Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+              int messageIndex = messageslist.indexOf(messageInstance);
+              messageslist[messageIndex] = Message.fromJson(jsonDecode);
+              saveMessages();
+              throw ("200");
+            }
+          case 401:
+            {
+              throw ("401");
+            }
+        }
+      });
+    } catch (e) {
+      throw (e.toString());
+    }
+    return null;
+  }
+
+  Future<String?> sendCameraImage(String imagePath) async {
     var uuid = const Uuid();
     var newfilename = uuid.v1();
 
@@ -219,44 +281,16 @@ class MessageProvider with ChangeNotifier {
     saveMessages();
 
     if (connection == ConnectionStatus.wifi) {
-      uploadImage(newInstance);
-    }
-  }
-
-  Future<void> uploadImage(Message messageInstance) async {
-    String? token = await credentialsInstance.readToken();
-
-    storage
-        .uploadfile(messageInstance.path, messageInstance.id)
-        .then((value) async {
-      var response = await http.post(Uri.parse(apiUrl), headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        'Authorization': 'Bearer $token'
-      }, body: {
-        'message': 'new message',
-        'path': value,
-        'dateTime': messageInstance.datetime,
-        'mediatype': 'image'
-      });
-
-      switch (response.statusCode) {
-        case 200:
-          {
-            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-            int messageIndex = messageslist.indexOf(messageInstance);
-            messageslist[messageIndex] = Message.fromJson(jsonDecode);
-            saveMessages();
-            break;
-          }
-        case 404:
-          throw ("Cannot Find The Requested Resource");
-        default:
-          throw (response.statusCode.toString());
+      try {
+        await uploadImage(newInstance);
+      } catch (e) {
+        throw (e.toString());
       }
-    });
+    }
+    return null;
   }
 
-  Future<void> sendVideo() async {
+  Future<String?> sendVideo() async {
     var uuid = const Uuid();
     var newfilename = uuid.v1();
 
@@ -266,7 +300,7 @@ class MessageProvider with ChangeNotifier {
         allowedExtensions: ['mp4', 'mkv', 'mov']);
 
     if (results == null) {
-      return;
+      return "";
     }
 
     final path = results.files.single.path;
@@ -285,41 +319,47 @@ class MessageProvider with ChangeNotifier {
     saveMessages();
 
     if (connection == ConnectionStatus.wifi) {
-      uploadVideo(newInstance);
+      try {
+        await uploadVideo(newInstance);
+      } catch (e) {
+        throw (e);
+      }
     }
+    return null;
   }
 
-  Future<void> uploadVideo(Message messageInstance) async {
+  Future<String?> uploadVideo(Message messageInstance) async {
     String? token = await credentialsInstance.readToken();
-    storage
-        .uploadVideo(messageInstance.path, messageInstance.id)
-        .then((value) async {
-      var response = await http.post(Uri.parse(apiUrl), headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        'Authorization': 'Bearer $token'
-      }, body: {
-        'message': 'new message',
-        'path': value,
-        'dateTime': messageInstance.datetime,
-        'mediatype': 'video'
+    try {
+      await storage
+          .uploadVideo(messageInstance.path, messageInstance.id)
+          .then((value) async {
+        var response = await http.post(Uri.parse(apiUrl), headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          'Authorization': 'Bearer $token'
+        }, body: {
+          'message': 'new message',
+          'path': value,
+          'dateTime': messageInstance.datetime,
+          'mediatype': 'video'
+        });
+
+        switch (response.statusCode) {
+          case 200:
+            {
+              Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
+              int messageIndex = messageslist.indexOf(messageInstance);
+              messageslist[messageIndex] = Message.fromJson(jsonDecode);
+              saveMessages();
+              throw ("200");
+            }
+          default:
+            throw (response.statusCode.toString());
+        }
       });
-
-      switch (response.statusCode) {
-        case 200:
-          {
-            Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
-            int messageIndex = messageslist.indexOf(messageInstance);
-            messageslist[messageIndex] = Message.fromJson(jsonDecode);
-            saveMessages();
-
-            break;
-          }
-        case 404:
-          throw ("Cannot Find The Requested Resource");
-        default:
-          throw (response.statusCode.toString());
-      }
-    });
+    } catch (e) {
+      throw (e.toString());
+    }
   }
 
   void saveMessages() async {
@@ -331,7 +371,7 @@ class MessageProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadMessages() async {
+  Future<String?> loadMessages() async {
     //Load Messages from mobile storage
 
     final prefs = await SharedPreferences.getInstance();
@@ -344,12 +384,17 @@ class MessageProvider with ChangeNotifier {
           .map<Message>((message) => Message.fromJson(message))
           .toList();
     } else if (connection == ConnectionStatus.wifi) {
-      await getMessages();
+      try {
+        await getMessages();
+      } catch (e) {
+        throw (e);
+      }
     }
     notifyListeners();
+    return null;
   }
 
-  Future<void> getMessages() async {
+  Future<String?> getMessages() async {
     //Getting new messages from API
     String? token = await credentialsInstance.readToken();
 
@@ -376,12 +421,12 @@ class MessageProvider with ChangeNotifier {
               .map<Message>((message) => Message.fromJson(message))
               .toList());
           break;
-        case 404:
-          throw ("Could not Find the Resource");
         default:
           throw (response.statusCode.toString());
       }
     }
+
     notifyListeners();
+    return null;
   }
 }

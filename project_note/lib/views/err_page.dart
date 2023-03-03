@@ -7,9 +7,12 @@ class ErrPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-      child: Text(statusCode, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),),
+        body: Center(
+      child: Text(
+        statusCode,
+        style: const TextStyle(
+            color: Colors.redAccent, fontWeight: FontWeight.bold),
+      ),
     ));
   }
 }

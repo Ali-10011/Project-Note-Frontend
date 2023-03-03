@@ -26,18 +26,37 @@ class _HomeState extends State<Home> {
 
   Color networkBarColor =
       (connection == ConnectionStatus.wifi) ? Colors.blue : Colors.white;
+  void _fireSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: Colors.red,
+      content: Text(
+        message.toString(),
+        style: const TextStyle(color: Colors.white),
+      ),
+    ));
+  }
+
+  Future<void> _doForcedLogoutActivities() async {
+    credentialsInstance.deleteToken();
+    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
+    _fireSnackBar("Session Expired !");
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
+    });
+  }
 
   Future<void> loadMore() async {
-    try {
-      if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
+    if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
+      try {
         Provider.of<MessageProvider>(context, listen: false).getMessages();
+      } catch (e) {
+        if (e == 401) {
+          _doForcedLogoutActivities();
+        } else {
+          _fireSnackBar(e.toString());
+        }
       }
-    } on Exception catch (e) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ErrPage(statusCode: e.toString()),
-          ));
     }
   }
 
@@ -48,15 +67,7 @@ class _HomeState extends State<Home> {
       if ((connection == ConnectionStatus.wifi)) {
         if (controller.position.maxScrollExtent == controller.offset) {
           if (!(isLastPage)) {
-            try {
-              loadMore();
-            } on Exception catch (e) {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ErrPage(statusCode: e.toString()),
-                  ));
-            }
+            loadMore();
           }
         }
       }
@@ -76,6 +87,23 @@ class _HomeState extends State<Home> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Images Reloaded !"),
       ));
+    });
+  }
+
+  void _changeConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    setState(() {
+      if (connectivityResult == ConnectivityResult.wifi) {
+        connection = (connection == ConnectionStatus.wifi)
+            ? ConnectionStatus.noConnection
+            : ConnectionStatus.wifi;
+      } else {
+        connection = ConnectionStatus.noConnection;
+      }
+      if (connection == ConnectionStatus.wifi) {
+        Provider.of<MessageProvider>(context, listen: false)
+            .uploadOfflineMessages();
+      }
     });
   }
 
@@ -120,22 +148,7 @@ class _HomeState extends State<Home> {
                     : Colors.white,
               ),
               onPressed: () async {
-                var connectivityResult =
-                    await (Connectivity().checkConnectivity());
-                setState(() {
-                  if (connectivityResult == ConnectivityResult.wifi) {
-                    connection = (connection == ConnectionStatus.wifi)
-                        ? ConnectionStatus.noConnection
-                        : ConnectionStatus.wifi;
-                  } else {
-                    connection = ConnectionStatus.noConnection;
-                  }
-                  if (connection == ConnectionStatus.wifi) {
-                    Provider.of<MessageProvider>(context, listen: false)
-                        .uploadOfflineMessages();
-                  }
-                });
-                // do something
+                _changeConnectivity();
               },
             )
           ],
@@ -193,8 +206,7 @@ class _HomeState extends State<Home> {
                             ),
                           );
                         } else {
-                          Provider.of<MessageProvider>(context, listen: false)
-                              .getMessages();
+                          loadMore();
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 32),
                             child: Center(child: CircularProgressIndicator()),
