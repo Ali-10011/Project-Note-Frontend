@@ -45,7 +45,7 @@ class MessageProvider with ChangeNotifier {
         await getMessages();
       }
     } catch (e) {
-      throw (e);
+      rethrow;
     }
     return null;
   }
@@ -93,7 +93,7 @@ class MessageProvider with ChangeNotifier {
         await uploadText(newInstance);
       }
     } catch (e) {
-      throw (e);
+      rethrow;
     }
     return null;
   }
@@ -322,7 +322,7 @@ class MessageProvider with ChangeNotifier {
       try {
         await uploadVideo(newInstance);
       } catch (e) {
-        throw (e);
+        rethrow;
       }
     }
     return null;
@@ -387,7 +387,7 @@ class MessageProvider with ChangeNotifier {
       try {
         await getMessages();
       } catch (e) {
-        throw (e);
+        rethrow;
       }
     }
     notifyListeners();

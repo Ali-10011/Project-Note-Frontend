@@ -33,6 +33,16 @@ class _AuthState extends State<Auth> {
     Navigator.of(context).pushReplacementNamed('/initial');
   }
 
+  void _fireSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: color,
+      content: Text(
+        message,
+        style: const TextStyle(color: Colors.white),
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -194,7 +204,9 @@ class _AuthState extends State<Auth> {
             UserCredentials credentialsInstance = UserCredentials();
             credentialsInstance.saveToken(jsonDecode['token']);
             sessionUserName = username;
+            _fireSnackBar("Welcome $username !", Colors.green);
             _pushLoadingPage();
+
             break;
           }
         default:
@@ -203,14 +215,7 @@ class _AuthState extends State<Auth> {
           });
       }
     } catch (e) {
-      //Report Error to User
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red,
-        content: Text(
-          e.toString(),
-          style: const TextStyle(color: Colors.white),
-        ),
-      ));
+      _fireSnackBar(e.toString(), Colors.red);
     }
     setState(() {
       _isLoading = false;
@@ -230,11 +235,7 @@ class _AuthState extends State<Auth> {
             UserCredentials credentialsInstance = UserCredentials();
             credentialsInstance.saveToken(jsonDecode['token']);
             sessionUserName = username;
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              backgroundColor: Colors.green,
-              content: Text("Sign up Successful",
-                  style: TextStyle(color: Colors.white)),
-            ));
+            _fireSnackBar("Sign up Successful !", Colors.green);
 
             _pushLoadingPage();
             break;
@@ -246,11 +247,7 @@ class _AuthState extends State<Auth> {
       }
     } catch (e) {
       //Report Error to User
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red,
-        content:
-            Text(e.toString(), style: const TextStyle(color: Colors.white)),
-      ));
+      _fireSnackBar(e.toString(), Colors.red);
     }
     setState(() {
       _isLoading = false;

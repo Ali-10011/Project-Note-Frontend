@@ -4,7 +4,6 @@ import 'package:project_note/animations/profile_hero.dart';
 import 'package:project_note/models/message_model.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
-import 'package:project_note/views/err_page.dart';
 import 'package:project_note/animations/image_hero.dart';
 import 'package:project_note/views/video_player.dart';
 import 'package:project_note/widgets/image_tile.dart';

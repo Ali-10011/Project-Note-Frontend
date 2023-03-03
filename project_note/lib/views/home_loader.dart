@@ -14,7 +14,6 @@ class LoadingState extends StatefulWidget {
 }
 
 class _LoadingStateState extends State<LoadingState> {
- 
   Future<void> waitForData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       //To Navigate From a Future  Builder
@@ -22,12 +21,12 @@ class _LoadingStateState extends State<LoadingState> {
     });
   }
 
-  Future<void> redirectToErrPage(final SnapshotErr) async {
+  Future<void> redirectToErrPage(final snapshotErr) async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       //To Navigate From a Future  Builder
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => ErrPage(
-                statusCode: SnapshotErr.toString(),
+                statusCode: snapshotErr.toString(),
               )));
     });
   }
