@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:project_note/globals/globals.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
 import 'package:project_note/views/err_page.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/providers/message_provider.dart';

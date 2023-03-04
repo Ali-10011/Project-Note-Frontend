@@ -1,5 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:intl/intl.dart';
+
 
 class UserCredentials {
   //This class will store/load/delete/check the token
@@ -24,7 +24,7 @@ class UserCredentials {
     if (tokenExpiry == null) {
       return false;
     }
-    
+
     DateTime dateTime = DateTime.parse(tokenExpiry);
 
     if (dateTime.toLocal().compareTo(DateTime.now()) > 0) {

@@ -1,9 +1,7 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter/widgets.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:provider/provider.dart';
+
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -26,7 +24,25 @@ class _LandingPageState extends State<LandingPage> {
       });
     }
   }
+  void setConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
 
+    setState(() {
+      if (connectivityResult == ConnectivityResult.mobile) {
+        connection = ConnectionStatus.mobileNetwork;
+      } else if (connectivityResult == ConnectivityResult.wifi) {
+        connection = ConnectionStatus.wifi;
+      } else {
+        connection = ConnectionStatus.noConnection;
+      }
+    });
+  }
+  
+ @override
+  initState() {
+    super.initState();
+    setConnection();
+  }
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(

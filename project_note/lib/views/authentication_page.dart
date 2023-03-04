@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_note/globals/globals.dart';
@@ -27,24 +26,9 @@ class _AuthState extends State<Auth> {
   String _warningmessage = '';
   bool _isLoading = false;
 
-  void setConnection() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-
-    setState(() {
-      if (connectivityResult == ConnectivityResult.mobile) {
-        connection = ConnectionStatus.mobileNetwork;
-      } else if (connectivityResult == ConnectivityResult.wifi) {
-        connection = ConnectionStatus.wifi;
-      } else {
-        connection = ConnectionStatus.noConnection;
-      }
-    });
-  }
-
   @override
   initState() {
     super.initState();
-    setConnection();
   }
 
   void _pushLoadingPage() {
