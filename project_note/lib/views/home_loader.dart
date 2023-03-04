@@ -78,9 +78,7 @@ class _LoadingStateState extends State<LoadingState> {
                         );
                       } else if (dataSnapshot.connectionState ==
                           ConnectionState.done) {
-                        Future.delayed(const Duration(milliseconds: 1500), () {
-                          uploadMessages();
-                        });
+                        uploadMessages();
 
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,

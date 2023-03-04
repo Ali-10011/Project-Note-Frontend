@@ -2,7 +2,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
 
-
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
 
@@ -12,37 +11,33 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   void _switchToPage(final snapShotData) {
-    if (snapShotData == false) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        //To Navigate From a Future  Builder
+    Future.delayed(const Duration(seconds: 2), () {
+      if (snapShotData == false) {
         Navigator.pushReplacementNamed(context, '/auth');
-      });
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        //To Navigate From a Future  Builder
-        Navigator.pushReplacementNamed(context, '/initial');
-      });
-    }
-  }
-  void setConnection() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-
-    setState(() {
-      if (connectivityResult == ConnectivityResult.mobile) {
-        connection = ConnectionStatus.mobileNetwork;
-      } else if (connectivityResult == ConnectivityResult.wifi) {
-        connection = ConnectionStatus.wifi;
       } else {
-        connection = ConnectionStatus.noConnection;
+        Navigator.pushReplacementNamed(context, '/initial');
       }
     });
   }
-  
- @override
+
+  void setConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+
+    if (connectivityResult == ConnectivityResult.mobile) {
+      connection = ConnectionStatus.mobileNetwork;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      connection = ConnectionStatus.wifi;
+    } else {
+      connection = ConnectionStatus.noConnection;
+    }
+  }
+
+  @override
   initState() {
     super.initState();
     setConnection();
   }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -54,6 +49,7 @@ class _LandingPageState extends State<LandingPage> {
           );
         } else if (dataSnapshot.connectionState == ConnectionState.done) {
           _switchToPage(dataSnapshot.data);
+
           return ClipRRect(
             child: Image.asset(
               'assets/landing_page.jpg',
