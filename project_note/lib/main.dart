@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:project_note/views/authentication_page.dart';
 import 'package:project_note/views/home_page.dart';
 import 'package:project_note/views/home_loader.dart';
+import 'package:project_note/views/landing_page.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/providers/message_provider.dart';
@@ -35,12 +36,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.dark(),
       title: 'Note',
-      initialRoute: '/auth',
+      initialRoute: '/landing',
       routes: {
         '/auth': (context) => const Auth(),
         '/home': (context) => const Home(),
         '/initial': (context) => const LoadingState(),
-        
+        '/landing': (context) => const LandingPage()
       },
       debugShowCheckedModeBanner: false,
     );

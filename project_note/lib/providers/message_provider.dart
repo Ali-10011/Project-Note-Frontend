@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:project_note/models/message_model.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:uuid/uuid.dart';
-import 'package:project_note/models/credentials_model.dart';
+
 
 class MessageProvider with ChangeNotifier {
   List<Message> messageslist = [];
@@ -27,9 +27,7 @@ class MessageProvider with ChangeNotifier {
   Future<String?> uploadOfflineMessages() async {
     try {
       if (messageslist.isEmpty) {
-        
-          await loadMessages();
-        
+        await loadMessages();
       } else if (messageslist.isNotEmpty) {
         messageslist
             .where((message) => (message.isUploaded == "false"))
@@ -43,12 +41,9 @@ class MessageProvider with ChangeNotifier {
           }
         });
       } else if (connection == ConnectionStatus.wifi) {
-        
-          await getMessages();
-        
+        await getMessages();
       }
     } catch (e) {
-     
       throw (e.toString());
     }
     return null;
@@ -103,7 +98,11 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<String?> uploadText(Message messageInstance) async {
-    UserCredentials credentialsInstance = UserCredentials();
+    bool isValid = await credentialsInstance.isTokenValid();
+    if (!(isValid)) {
+      //we check if the token is valid
+      throw ("401");
+    }
     String? token = await credentialsInstance.readToken();
 
     var response = await http.post(Uri.parse(apiUrl), headers: {
@@ -158,6 +157,11 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<String?> deleteMessagefromDatabase(String messageID) async {
+    bool isValid = await credentialsInstance.isTokenValid();
+    if (!(isValid)) {
+      //we check if the token is valid
+      throw ("401");
+    }
     String? token = await credentialsInstance.readToken();
 
     var response = await http.delete(
@@ -239,6 +243,11 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<String?> uploadImage(Message messageInstance) async {
+    bool isValid = await credentialsInstance.isTokenValid();
+    if (!(isValid)) {
+      //we check if the token is valid
+      throw ("401");
+    }
     String? token = await credentialsInstance.readToken();
     try {
       await storage
@@ -342,6 +351,11 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<String?> uploadVideo(Message messageInstance) async {
+    bool isValid = await credentialsInstance.isTokenValid();
+    if (!(isValid)) {
+      //we check if the token is valid
+      throw ("401");
+    }
     String? token = await credentialsInstance.readToken();
     try {
       await storage
@@ -401,7 +415,6 @@ class MessageProvider with ChangeNotifier {
       try {
         await getMessages();
       } catch (e) {
-        print(e.toString());
         throw (e.toString());
       }
     }
@@ -410,6 +423,11 @@ class MessageProvider with ChangeNotifier {
 
   Future<String?> getMessages() async {
     //Getting new messages from API
+    bool isValid = await credentialsInstance.isTokenValid();
+    if (!(isValid)) {
+      //we check if the token is valid
+      throw ("401");
+    }
     String? token = await credentialsInstance.readToken();
 
     final response = await http.get(
@@ -426,10 +444,8 @@ class MessageProvider with ChangeNotifier {
     switch (response.statusCode) {
       case 200:
         if (data.isEmpty) {
-         
           isLastPage = true;
         } else if (data.length < loadPerPage) {
-          
           messageslist.addAll(json
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))

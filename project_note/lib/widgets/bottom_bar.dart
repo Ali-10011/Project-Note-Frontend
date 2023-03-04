@@ -24,7 +24,7 @@ class _BottomBarState extends State<BottomBar> {
   }
 
   Future<void> _doForcedLogoutActivities() async {
-    credentialsInstance.deleteToken();
+    credentialsInstance.deleteTokenCredentials();
     Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
     _fireSnackBar("Session Expired !", Colors.red);
     Future.delayed(const Duration(seconds: 1), () {

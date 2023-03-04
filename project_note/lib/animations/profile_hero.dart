@@ -15,7 +15,7 @@ class ProfileHero extends StatefulWidget {
 class _ProfileHeroState extends State<ProfileHero> {
   bool isLoading = false;
   Future<void> _doLogoutActivities() async {
-    credentialsInstance.deleteToken();
+    credentialsInstance.deleteTokenCredentials();
     Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
     isLastPage = false;
     Future.delayed(const Duration(seconds: 2), () {
