@@ -3,6 +3,8 @@ import 'package:bubble/bubble.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/message_model.dart';
 import 'package:project_note/providers/message_provider.dart';
+import 'package:project_note/services/forced_logout.dart';
+import 'package:project_note/widgets/custom_snackbar.dart';
 import 'package:provider/provider.dart';
 
 Widget messageTile(Message messageEntry, BuildContext context) {
@@ -35,9 +37,23 @@ Widget messageTile(Message messageEntry, BuildContext context) {
               ),
               IconButton(
                 padding: const EdgeInsets.all(0),
-                onPressed: () {
-                  Provider.of<MessageProvider>(context, listen: false)
-                      .deleteMessage(messageEntry);
+                onPressed: () async {
+                  try {
+                    await Provider.of<MessageProvider>(context, listen: false)
+                        .deleteMessage(messageEntry);
+                  } catch (e) {
+                    if (e == "401") {
+                      fireSnackBar("Session Expired !", Colors.red,
+                          Colors.white, context);
+                      doForcedLogoutActivities(context);
+                    } else {
+                      fireSnackBar(
+                          "Cannot Perform Action. Response statusCode : $e ",
+                          Colors.red,
+                          Colors.white,
+                          context);
+                    }
+                  }
                 },
                 icon: const Icon(Icons.delete),
                 color: Colors.black,

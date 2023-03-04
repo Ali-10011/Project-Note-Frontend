@@ -5,7 +5,7 @@ import 'package:project_note/models/firebase_storage.dart';
 import 'package:intl/intl.dart';
 
 bool isLastPage = false;
-const int loadPerPage = 15;
+const int loadPerPage = 10;
 
 const String apiUrl = 'http://localhost:3000/api/home/messages';
 UserCredentials credentialsInstance = UserCredentials();

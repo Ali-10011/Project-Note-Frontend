@@ -12,6 +12,9 @@ import 'package:project_note/widgets/message_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/widgets/bottom_bar.dart';
 
+import '../services/forced_logout.dart';
+import '../widgets/custom_snackbar.dart';
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -25,35 +28,18 @@ class _HomeState extends State<Home> {
 
   Color networkBarColor =
       (connection == ConnectionStatus.wifi) ? Colors.blue : Colors.white;
-  void _fireSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: Colors.red,
-      content: Text(
-        message.toString(),
-        style: const TextStyle(color: Colors.white),
-      ),
-    ));
-  }
 
-  Future<void> _doForcedLogoutActivities() async {
-    credentialsInstance.deleteToken();
-    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
-    _fireSnackBar("Session Expired !");
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
-    });
-  }
-
-  Future<void> loadMore() async {
+  void loadMore() async {
     if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
       try {
-        Provider.of<MessageProvider>(context, listen: false).getMessages();
+        await Provider.of<MessageProvider>(context, listen: false)
+            .getMessages();
       } catch (e) {
-        if (e == 401) {
-          _doForcedLogoutActivities();
+        if (e == "401") {
+          doForcedLogoutActivities(context);
+        } else if (e == "200") {
         } else {
-          _fireSnackBar(e.toString());
+          fireSnackBar(e.toString(), Colors.red, Colors.white, context);
         }
       }
     }
@@ -68,6 +54,7 @@ class _HomeState extends State<Home> {
           if (!(isLastPage)) {
             loadMore();
           }
+         
         }
       }
     });

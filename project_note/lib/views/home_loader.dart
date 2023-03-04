@@ -31,33 +31,25 @@ class _LoadingStateState extends State<LoadingState> {
     });
   }
 
-  void uploadMessages() {
-    Provider.of<MessageProvider>(context, listen: false)
-        .uploadOfflineMessages();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      //To Navigate From a Future  Builder
-      Navigator.pushReplacementNamed(context, '/home');
-    });
-  }
-
-  void setConnection() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-
-    setState(() {
-      if (connectivityResult == ConnectivityResult.mobile) {
-        connection = ConnectionStatus.mobileNetwork;
-      } else if (connectivityResult == ConnectivityResult.wifi) {
-        connection = ConnectionStatus.wifi;
+  void uploadMessages() async {
+    try {
+      await Provider.of<MessageProvider>(context, listen: false)
+          .uploadOfflineMessages();
+    } catch (e) {
+      if (e == "200") {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          //To Navigate From a Future  Builder
+          Navigator.pushReplacementNamed(context, '/home');
+        });
       } else {
-        connection = ConnectionStatus.noConnection;
+        redirectToErrPage(e.toString());
       }
-    });
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    setConnection();
   }
 
   @override

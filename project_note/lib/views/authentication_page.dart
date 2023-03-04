@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/credentials_model.dart';
+
+import '../widgets/custom_snackbar.dart';
 
 class Auth extends StatefulWidget {
   const Auth({Key? key}) : super(key: key);
@@ -24,23 +27,30 @@ class _AuthState extends State<Auth> {
   String _warningmessage = '';
   bool _isLoading = false;
 
+  void setConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+
+    setState(() {
+      if (connectivityResult == ConnectivityResult.mobile) {
+        connection = ConnectionStatus.mobileNetwork;
+      } else if (connectivityResult == ConnectivityResult.wifi) {
+        connection = ConnectionStatus.wifi;
+      } else {
+        connection = ConnectionStatus.noConnection;
+      }
+    });
+  }
+
   @override
   initState() {
     super.initState();
+    setConnection();
   }
 
   void _pushLoadingPage() {
+    fireSnackBar(
+        "Welcome $sessionUserName !", Colors.green, Colors.white, context);
     Navigator.of(context).pushReplacementNamed('/initial');
-  }
-
-  void _fireSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: color,
-      content: Text(
-        message,
-        style: const TextStyle(color: Colors.white),
-      ),
-    ));
   }
 
   @override
@@ -204,7 +214,6 @@ class _AuthState extends State<Auth> {
             UserCredentials credentialsInstance = UserCredentials();
             credentialsInstance.saveToken(jsonDecode['token']);
             sessionUserName = username;
-            _fireSnackBar("Welcome $username !", Colors.green);
             _pushLoadingPage();
 
             break;
@@ -215,7 +224,7 @@ class _AuthState extends State<Auth> {
           });
       }
     } catch (e) {
-      _fireSnackBar(e.toString(), Colors.red);
+      fireSnackBar(e.toString(), Colors.red, Colors.white, context);
     }
     setState(() {
       _isLoading = false;
@@ -235,7 +244,6 @@ class _AuthState extends State<Auth> {
             UserCredentials credentialsInstance = UserCredentials();
             credentialsInstance.saveToken(jsonDecode['token']);
             sessionUserName = username;
-            _fireSnackBar("Sign up Successful !", Colors.green);
 
             _pushLoadingPage();
             break;
@@ -247,7 +255,7 @@ class _AuthState extends State<Auth> {
       }
     } catch (e) {
       //Report Error to User
-      _fireSnackBar(e.toString(), Colors.red);
+      fireSnackBar(e.toString(), Colors.red, Colors.white, context);
     }
     setState(() {
       _isLoading = false;

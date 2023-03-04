@@ -17,6 +17,7 @@ class _ProfileHeroState extends State<ProfileHero> {
   Future<void> _doLogoutActivities() async {
     credentialsInstance.deleteToken();
     Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
+    isLastPage = false;
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.of(context)
           .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);

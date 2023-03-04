@@ -27,9 +27,10 @@ class MessageProvider with ChangeNotifier {
   Future<String?> uploadOfflineMessages() async {
     try {
       if (messageslist.isEmpty) {
-        await loadMessages();
-      }
-      if (messageslist.isNotEmpty) {
+        
+          await loadMessages();
+        
+      } else if (messageslist.isNotEmpty) {
         messageslist
             .where((message) => (message.isUploaded == "false"))
             .forEach((offlineMessage) async {
@@ -42,10 +43,13 @@ class MessageProvider with ChangeNotifier {
           }
         });
       } else if (connection == ConnectionStatus.wifi) {
-        await getMessages();
+        
+          await getMessages();
+        
       }
     } catch (e) {
-      rethrow;
+     
+      throw (e.toString());
     }
     return null;
   }
@@ -130,14 +134,27 @@ class MessageProvider with ChangeNotifier {
     return null;
   }
 
-  void deleteMessage(Message messageInstance) {
-    messageslist.remove(messageInstance);
-    saveMessages();
+  Future<String?> deleteMessage(Message messageInstance) async {
     if (connection == ConnectionStatus.wifi) {
-      deleteMessagefromDatabase(messageInstance.id);
+      //The user is connected to the internet
+      try {
+        await deleteMessagefromDatabase(messageInstance.id);
+      } catch (e) {
+        if (e == "200") {
+          messageslist.remove(messageInstance);
+          saveMessages(); //Sync the changes with the shared prefs
+        } else {
+          rethrow;
+        }
+      }
     } else if (messageInstance.isUploaded == "true") {
+      //The user is not connected to the internet
+      messageslist.remove(
+          messageInstance); //Remove the message from offline view of user.
+      saveMessages(); //Sync the changes with the shared prefs
       flagforDeletion(messageInstance.id);
     }
+    return null;
   }
 
   Future<String?> deleteMessagefromDatabase(String messageID) async {
@@ -154,23 +171,18 @@ class MessageProvider with ChangeNotifier {
       case 200:
         {
           removeflagforDeletion(messageID);
+          throw ("200"); //Tells the caller function that the message was sucessfully deleted
         }
-        break;
-      case 201:
-        throw (201);
-      case 404:
+      case 401: //This case means that the token has expired
         {
-          flagforDeletion(messageID);
-          throw ("Cannot Find The Requested Resource");
+          throw ("401"); //we save nothing, perform no action
         }
-
-      default:
+      default: //For any other error code
         {
           flagforDeletion(messageID);
           throw (response.statusCode.toString());
         }
     }
-    return null;
   }
 
   void flagforDeletion(String messageID) async {
@@ -243,6 +255,7 @@ class MessageProvider with ChangeNotifier {
         });
 
         switch (response.statusCode) {
+          //Throw back to the calling function;
           case 200:
             {
               Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
@@ -383,14 +396,15 @@ class MessageProvider with ChangeNotifier {
           .decode(data)
           .map<Message>((message) => Message.fromJson(message))
           .toList();
+      notifyListeners();
     } else if (connection == ConnectionStatus.wifi) {
       try {
         await getMessages();
       } catch (e) {
-        rethrow;
+        print(e.toString());
+        throw (e.toString());
       }
     }
-    notifyListeners();
     return null;
   }
 
@@ -408,25 +422,31 @@ class MessageProvider with ChangeNotifier {
         });
 
     final data = json.decode(response.body) as List<dynamic>;
-    if (data.isEmpty) {
-      isLastPage = true;
-    } else if (data.isNotEmpty) {
-      switch (response.statusCode) {
-        case 200:
-          if (data.length < 15) {
-            isLastPage = true;
-          }
+
+    switch (response.statusCode) {
+      case 200:
+        if (data.isEmpty) {
+         
+          isLastPage = true;
+        } else if (data.length < loadPerPage) {
+          
           messageslist.addAll(json
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))
               .toList());
-          break;
-        default:
-          throw (response.statusCode.toString());
-      }
+          notifyListeners();
+          isLastPage = true;
+        } else {
+          messageslist.addAll(json
+              .decode(response.body)
+              .map<Message>((message) => Message.fromJson(message))
+              .toList());
+          notifyListeners();
+          isLastPage = false;
+        }
+        throw ("200");
+      default:
+        throw (response.statusCode.toString());
     }
-
-    notifyListeners();
-    return null;
   }
 }
