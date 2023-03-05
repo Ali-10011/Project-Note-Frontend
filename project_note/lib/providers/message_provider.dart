@@ -419,6 +419,7 @@ class MessageProvider with ChangeNotifier {
           .map<Message>((message) => Message.fromJson(message))
           .toList();
       notifyListeners();
+      print(data);
       throw ("200");
     } else if (connection == ConnectionStatus.wifi) {
       try {
@@ -459,17 +460,18 @@ class MessageProvider with ChangeNotifier {
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))
               .toList());
-          notifyListeners();
+          
           isLastPage = true;
         } else {
           messageslist.addAll(json
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))
               .toList());
-          notifyListeners();
+         
           isLastPage = false;
         }
         saveMessages();
+        print(data.length);
         throw ("200");
       default:
         throw (response.statusCode.toString());

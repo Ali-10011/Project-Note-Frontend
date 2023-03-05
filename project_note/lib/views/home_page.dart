@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/animations/profile_hero.dart';
 import 'package:project_note/models/message_model.dart';
@@ -6,16 +5,13 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
 import 'package:project_note/animations/image_hero.dart';
 import 'package:project_note/views/video_player.dart';
-
 import 'package:project_note/widgets/image_tile.dart';
 import 'package:project_note/widgets/video_tile.dart';
 import 'package:project_note/widgets/message_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/widgets/bottom_bar.dart';
-
 import '../services/forced_logout.dart';
 import '../widgets/custom_snackbar.dart';
-
 import '../widgets/connection_alert.dart';
 
 class Home extends StatefulWidget {
@@ -52,13 +48,15 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     controller.addListener(() {
-      if ((connection == ConnectionStatus.wifi)) {
-        if (controller.position.maxScrollExtent == controller.offset) {
-          if (!(isLastPage)) {
-            loadMore();
+      Future.delayed(const Duration(seconds: 2), () {
+        if ((connection == ConnectionStatus.wifi)) {
+          if (controller.position.maxScrollExtent == controller.offset) {
+            if (!(isLastPage)) {
+              loadMore();
+            }
           }
         }
-      }
+      });
     });
   }
 
@@ -77,8 +75,6 @@ class _HomeState extends State<Home> {
       ));
     });
   }
-
- 
 
   @override
   Widget build(BuildContext context) {
