@@ -47,9 +47,14 @@ class _LoadingStateState extends State<LoadingState> {
     }
   }
 
+  void _setUserName() async {
+    await credentialsInstance.setSessionUserName();
+  }
+
   @override
   void initState() {
     super.initState();
+    _setUserName();
   }
 
   @override

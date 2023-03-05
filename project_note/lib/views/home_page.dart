@@ -6,6 +6,7 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
 import 'package:project_note/animations/image_hero.dart';
 import 'package:project_note/views/video_player.dart';
+import 'package:project_note/widgets/connection_warning.dart';
 import 'package:project_note/widgets/image_tile.dart';
 import 'package:project_note/widgets/video_tile.dart';
 import 'package:project_note/widgets/message_tile.dart';
@@ -54,7 +55,6 @@ class _HomeState extends State<Home> {
           if (!(isLastPage)) {
             loadMore();
           }
-         
         }
       }
     });
@@ -87,8 +87,17 @@ class _HomeState extends State<Home> {
         connection = ConnectionStatus.noConnection;
       }
       if (connection == ConnectionStatus.wifi) {
-        Provider.of<MessageProvider>(context, listen: false)
-            .uploadOfflineMessages();
+        try {
+          Provider.of<MessageProvider>(context, listen: false)
+              .uploadOfflineMessages();
+        } catch (e) {
+          if (e == "401") {
+            doForcedLogoutActivities(context);
+          } else if (e != "200") {
+            fireSnackBar("Exception Status Code: $e happened.", Colors.red,
+                Colors.white, context);
+          }
+        }
       }
     });
   }
@@ -133,8 +142,11 @@ class _HomeState extends State<Home> {
                     ? Colors.blue
                     : Colors.white,
               ),
-              onPressed: () async {
-                _changeConnectivity();
+              onPressed: ()  {
+               Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const ConnectionMessage()),
+  );
               },
             )
           ],

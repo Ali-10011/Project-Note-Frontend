@@ -7,7 +7,6 @@ import 'package:project_note/models/message_model.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:uuid/uuid.dart';
 
-
 class MessageProvider with ChangeNotifier {
   List<Message> messageslist = [];
   List<String> deletedMessagesList = [];
@@ -26,9 +25,12 @@ class MessageProvider with ChangeNotifier {
 
   Future<String?> uploadOfflineMessages() async {
     try {
-      if (messageslist.isEmpty) {
-        await loadMessages();
+      if ((messageslist.isEmpty)) {
+       
+        await loadMessages(); //no messages have been loaded, and offline mode so load existing messages instead
       } else if (messageslist.isNotEmpty) {
+        //we already have some loaded messages in the list
+       
         messageslist
             .where((message) => (message.isUploaded == "false"))
             .forEach((offlineMessage) async {
@@ -40,8 +42,6 @@ class MessageProvider with ChangeNotifier {
             await uploadVideo(offlineMessage);
           }
         });
-      } else if (connection == ConnectionStatus.wifi) {
-        await getMessages();
       }
     } catch (e) {
       throw (e.toString());
@@ -404,14 +404,17 @@ class MessageProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     final data = prefs.getString('messages') ?? '';
-    if (data != '') {
+
+    if (data.isNotEmpty) {
       //Converts the decoded json string to a 'Message' type Map.
       messageslist = json
           .decode(data)
           .map<Message>((message) => Message.fromJson(message))
           .toList();
       notifyListeners();
+      throw ("200");
     } else if (connection == ConnectionStatus.wifi) {
+      
       try {
         await getMessages();
       } catch (e) {
@@ -460,6 +463,7 @@ class MessageProvider with ChangeNotifier {
           notifyListeners();
           isLastPage = false;
         }
+        saveMessages();
         throw ("200");
       default:
         throw (response.statusCode.toString());

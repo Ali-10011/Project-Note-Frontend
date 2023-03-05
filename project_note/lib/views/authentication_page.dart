@@ -197,9 +197,8 @@ class _AuthState extends State<Auth> {
             Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
             UserCredentials credentialsInstance = UserCredentials();
             credentialsInstance.saveTokenCredentials(
-                jsonDecode['token'], jsonDecode['tokenExpiry']);
+                jsonDecode['token'], jsonDecode['tokenExpiry'], username);
             sessionUserName = username;
-
             _pushLoadingPage();
 
             break;
@@ -229,9 +228,8 @@ class _AuthState extends State<Auth> {
             Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
             UserCredentials credentialsInstance = UserCredentials();
             credentialsInstance.saveTokenCredentials(
-                jsonDecode['token'], jsonDecode['tokenExpiry']);
+                jsonDecode['token'], jsonDecode['tokenExpiry'], username);
             sessionUserName = username;
-
             _pushLoadingPage();
             break;
           }
