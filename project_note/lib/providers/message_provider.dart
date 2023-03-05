@@ -315,7 +315,7 @@ class MessageProvider with ChangeNotifier {
         throw (e.toString());
       }
     }
-    return null;
+    throw ("200"); 
   }
 
   Future<String?> sendVideo() async {
@@ -419,7 +419,7 @@ class MessageProvider with ChangeNotifier {
           .map<Message>((message) => Message.fromJson(message))
           .toList();
       notifyListeners();
-      print(data);
+      
       throw ("200");
     } else if (connection == ConnectionStatus.wifi) {
       try {
@@ -471,7 +471,7 @@ class MessageProvider with ChangeNotifier {
           isLastPage = false;
         }
         saveMessages();
-        print(data.length);
+       
         throw ("200");
       default:
         throw (response.statusCode.toString());
