@@ -67,17 +67,18 @@ class _BottomBarState extends State<BottomBar> {
   }
 
   void sendMessage() async {
+    String text = _messagecontroller.value.text.toString();
+    _messagecontroller.clear();
     try {
       await Provider.of<MessageProvider>(context, listen: false)
-          .sendMessage(_messagecontroller.value.text.toString());
+          .sendMessage(text);
     } catch (e) {
       if (e.toString() == "401") {
         _doForcedLogoutActivities();
-      } else {
+      } else if (e != "200") {
         _fireSnackBar("Error ${e.toString()} occurred", Colors.red);
       }
     }
-    _messagecontroller.clear();
   }
 
   Widget iconCreation(IconData icons, Color color, String text) {

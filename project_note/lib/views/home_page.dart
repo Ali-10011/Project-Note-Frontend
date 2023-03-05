@@ -78,31 +78,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _changeConnectivity() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    setState(() {
-      if (connectivityResult == ConnectivityResult.wifi) {
-        connection = (connection == ConnectionStatus.wifi)
-            ? ConnectionStatus.noConnection
-            : ConnectionStatus.wifi;
-      } else {
-        connection = ConnectionStatus.noConnection;
-      }
-      if (connection == ConnectionStatus.wifi) {
-        try {
-          Provider.of<MessageProvider>(context, listen: false)
-              .uploadOfflineMessages();
-        } catch (e) {
-          if (e == "401") {
-            doForcedLogoutActivities(context);
-          } else if (e != "200") {
-            fireSnackBar("Exception Status Code: $e happened.", Colors.red,
-                Colors.white, context);
-          }
-        }
-      }
-    });
-  }
+ 
 
   @override
   Widget build(BuildContext context) {

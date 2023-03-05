@@ -30,7 +30,7 @@ class _LandingPageState extends State<LandingPage> {
     } else {
       connection = ConnectionStatus.noConnection;
     }
-   
+ 
   }
 
   @override

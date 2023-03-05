@@ -26,22 +26,27 @@ class MessageProvider with ChangeNotifier {
   Future<String?> uploadOfflineMessages() async {
     try {
       if ((messageslist.isEmpty)) {
-       
         await loadMessages(); //no messages have been loaded, and offline mode so load existing messages instead
       } else if (messageslist.isNotEmpty) {
         //we already have some loaded messages in the list
-       
+
         messageslist
             .where((message) => (message.isUploaded == "false"))
             .forEach((offlineMessage) async {
-          if (offlineMessage.mediatype == 'text') {
-            await uploadText(offlineMessage);
-          } else if (offlineMessage.mediatype == 'image') {
-            await uploadImage(offlineMessage);
-          } else if (offlineMessage.mediatype == 'video') {
-            await uploadVideo(offlineMessage);
+          try {
+            if (offlineMessage.mediatype == 'text') {
+              await uploadText(offlineMessage);
+            } else if (offlineMessage.mediatype == 'image') {
+              await uploadImage(offlineMessage);
+            } else if (offlineMessage.mediatype == 'video') {
+              await uploadVideo(offlineMessage);
+            }
+          } catch (e) {
+            //message is uploaded
           }
         });
+        //when all messages are done uploaded, send back to caller function
+        throw ("200");
       }
     } catch (e) {
       throw (e.toString());
@@ -123,14 +128,13 @@ class MessageProvider with ChangeNotifier {
           messageslist[messageindex] = Message.fromJson(jsonDecode);
           saveMessages();
         }
-        break;
+        throw ("200");
       case 401:
         throw ("401");
 
       default:
         throw (response.statusCode);
     }
-    return null;
   }
 
   Future<String?> deleteMessage(Message messageInstance) async {
@@ -414,7 +418,6 @@ class MessageProvider with ChangeNotifier {
       notifyListeners();
       throw ("200");
     } else if (connection == ConnectionStatus.wifi) {
-      
       try {
         await getMessages();
       } catch (e) {

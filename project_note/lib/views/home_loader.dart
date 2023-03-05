@@ -31,6 +31,19 @@ class _LoadingStateState extends State<LoadingState> {
     });
   }
 
+  void loadMessages() async {
+   
+    try {
+      await Provider.of<MessageProvider>(context, listen: false).loadMessages();
+    } catch (e) {
+      if (e == "200") {
+        uploadMessages();
+      } else {
+        redirectToErrPage(e.toString());
+      }
+    }
+  }
+
   void uploadMessages() async {
     try {
       await Provider.of<MessageProvider>(context, listen: false)
@@ -41,29 +54,29 @@ class _LoadingStateState extends State<LoadingState> {
           //To Navigate From a Future  Builder
           Navigator.pushReplacementNamed(context, '/home');
         });
-      } else {
+      }
+    }
+  }
+
+  Future<void> doOnlineSetup() async {
+    try {
+      await Provider.of<MessageProvider>(context, listen: false)
+          .deleteFlaggedMessages();
+    } catch (e) {
+      if (e == "200") {
+        return;
+      }
+      if (e != "200") {
         redirectToErrPage(e.toString());
       }
     }
   }
 
-Future<void> doOnlineSetup() async{
-  try{
-   await Provider.of<MessageProvider>(context, listen: false)
-                        .deleteFlaggedMessages();
-  }
-  catch(e)
-  {
-    if(e != "200")
-    {
-      redirectToErrPage(e.toString());
-    }
-  }
-}
   Future<void> doOfflineSetup() async {
     try {
       await Provider.of<MessageProvider>(context, listen: false).loadMessages();
     } catch (e) {
+     
       return;
     }
   }
@@ -103,7 +116,7 @@ Future<void> doOnlineSetup() async{
                         );
                       } else if (dataSnapshot.connectionState ==
                           ConnectionState.done) {
-                        uploadMessages();
+                        loadMessages();
 
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
