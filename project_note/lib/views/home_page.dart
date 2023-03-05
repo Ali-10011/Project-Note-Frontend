@@ -6,7 +6,7 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
 import 'package:project_note/animations/image_hero.dart';
 import 'package:project_note/views/video_player.dart';
-import 'package:project_note/widgets/connection_warning.dart';
+
 import 'package:project_note/widgets/image_tile.dart';
 import 'package:project_note/widgets/video_tile.dart';
 import 'package:project_note/widgets/message_tile.dart';
@@ -15,6 +15,8 @@ import 'package:project_note/widgets/bottom_bar.dart';
 
 import '../services/forced_logout.dart';
 import '../widgets/custom_snackbar.dart';
+
+import '../widgets/connection_alert.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -137,16 +139,20 @@ class _HomeState extends State<Home> {
             ),
             IconButton(
               icon: Icon(
-                Icons.wifi,
+                (connection == ConnectionStatus.wifi)
+                    ? Icons.wifi_outlined
+                    : Icons.signal_wifi_bad_outlined,
                 color: (connection == ConnectionStatus.wifi)
                     ? Colors.blue
-                    : Colors.white,
+                    : Colors.red,
               ),
-              onPressed: ()  {
-               Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const ConnectionMessage()),
-  );
+              onPressed: () {
+                showModalBottomSheet(
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    builder: (builder) => (connection == ConnectionStatus.wifi
+                        ? connectionAlert(context)
+                        : noConnectionAlert(context)));
               },
             )
           ],
