@@ -47,6 +47,27 @@ class _LoadingStateState extends State<LoadingState> {
     }
   }
 
+Future<void> doOnlineSetup() async{
+  try{
+   await Provider.of<MessageProvider>(context, listen: false)
+                        .deleteFlaggedMessages();
+  }
+  catch(e)
+  {
+    if(e != "200")
+    {
+      redirectToErrPage(e.toString());
+    }
+  }
+}
+  Future<void> doOfflineSetup() async {
+    try {
+      await Provider.of<MessageProvider>(context, listen: false).loadMessages();
+    } catch (e) {
+      return;
+    }
+  }
+
   void _setUserName() async {
     await credentialsInstance.setSessionUserName();
   }
@@ -67,8 +88,7 @@ class _LoadingStateState extends State<LoadingState> {
           body: (connection == ConnectionStatus.wifi)
               ? Center(
                   child: FutureBuilder(
-                    future: Provider.of<MessageProvider>(context, listen: false)
-                        .deleteFlaggedMessages(),
+                    future: doOnlineSetup(),
                     builder: (context, dataSnapshot) {
                       if (dataSnapshot.connectionState ==
                           ConnectionState.waiting) {
@@ -111,8 +131,7 @@ class _LoadingStateState extends State<LoadingState> {
                 )
               : Center(
                   child: FutureBuilder(
-                    future: Provider.of<MessageProvider>(context, listen: false)
-                        .loadMessages(),
+                    future: doOfflineSetup(),
                     builder: (context, dataSnapshot) {
                       if (dataSnapshot.connectionState ==
                           ConnectionState.waiting) {
