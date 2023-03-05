@@ -187,8 +187,7 @@ class _AuthState extends State<Auth> {
 
   Future<void> loginUser(String username, String password) async {
     try {
-      var response = await http.post(
-          Uri.parse('http://localhost:3000/api/auth/login'),
+      var response = await http.post(Uri.parse('${apiUrl}auth/login'),
           headers: {"Content-Type": "application/x-www-form-urlencoded"},
           body: {'username': username, 'password': password});
       switch (response.statusCode) {
@@ -218,8 +217,7 @@ class _AuthState extends State<Auth> {
 
   Future<void> registerUser(String username, String password) async {
     try {
-      var response = await http.post(
-          Uri.parse('http://localhost:3000/api/auth/register'),
+      var response = await http.post(Uri.parse('${apiUrl}auth/register'),
           headers: {"Content-Type": "application/x-www-form-urlencoded"},
           body: {'username': username, 'password': password});
       switch (response.statusCode) {

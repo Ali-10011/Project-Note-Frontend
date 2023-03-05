@@ -74,7 +74,7 @@ class MessageProvider with ChangeNotifier {
       await prefs.setString(
           'deletedMessages', json.encode(deletedMessagesList));
     }
-    return null;
+    throw ("200");
   }
 
   Future<String?> sendMessage(String messageEntry) async {
@@ -110,7 +110,8 @@ class MessageProvider with ChangeNotifier {
     }
     String? token = await credentialsInstance.readToken();
 
-    var response = await http.post(Uri.parse(apiUrl), headers: {
+    var response =
+        await http.post(Uri.parse('${apiUrl}home/messages'), headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       'Authorization': 'Bearer $token'
     }, body: {
@@ -169,7 +170,7 @@ class MessageProvider with ChangeNotifier {
     String? token = await credentialsInstance.readToken();
 
     var response = await http.delete(
-      Uri.parse("$apiUrl/$messageID"),
+      Uri.parse("${apiUrl}home/messages/$messageID"),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token'
@@ -257,7 +258,8 @@ class MessageProvider with ChangeNotifier {
       await storage
           .uploadfile(messageInstance.path, messageInstance.id)
           .then((value) async {
-        var response = await http.post(Uri.parse(apiUrl), headers: {
+        var response =
+            await http.post(Uri.parse('${apiUrl}home/messages'), headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           'Authorization': 'Bearer $token'
         }, body: {
@@ -365,7 +367,8 @@ class MessageProvider with ChangeNotifier {
       await storage
           .uploadVideo(messageInstance.path, messageInstance.id)
           .then((value) async {
-        var response = await http.post(Uri.parse(apiUrl), headers: {
+        var response =
+            await http.post(Uri.parse('${apiUrl}home/messages'), headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           'Authorization': 'Bearer $token'
         }, body: {
@@ -438,7 +441,7 @@ class MessageProvider with ChangeNotifier {
 
     final response = await http.get(
         Uri.parse(
-            '$apiUrl?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}'),
+            '${apiUrl}home/messages?skip=${messageslist.length.toString()}&perpage=${loadPerPage.toString()}'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

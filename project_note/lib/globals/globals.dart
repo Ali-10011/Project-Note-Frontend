@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 bool isLastPage = false;
 const int loadPerPage = 10;
 
-const String apiUrl = 'http://localhost:3000/api/home/messages';
+const String apiUrl = 'https://notebackend.herokuapp.com/api/';
 UserCredentials credentialsInstance = UserCredentials();
 
 Storage storage = Storage();
