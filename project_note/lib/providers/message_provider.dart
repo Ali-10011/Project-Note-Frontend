@@ -139,13 +139,14 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<String?> deleteMessage(Message messageInstance) async {
+    messageslist.remove(messageInstance);
+    notifyListeners();
     if (connection == ConnectionStatus.wifi) {
       //The user is connected to the internet
       try {
         await deleteMessagefromDatabase(messageInstance.id);
       } catch (e) {
         if (e == "200") {
-          messageslist.remove(messageInstance);
           saveMessages(); //Sync the changes with the shared prefs
         } else {
           rethrow;
