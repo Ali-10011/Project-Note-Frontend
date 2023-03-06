@@ -18,9 +18,10 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late final TextEditingController _usernamecontroller;
-
-  late final TextEditingController _passwordcontroller;
+  late final TextEditingController _usernamecontroller= TextEditingController();
+   
+  late final TextEditingController _passwordcontroller =
+      TextEditingController();
 
   bool _hidepassword = true;
   bool _usernamebuttonenabled = true;
