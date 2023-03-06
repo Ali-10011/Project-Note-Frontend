@@ -18,10 +18,9 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late final TextEditingController _usernamecontroller =
-      TextEditingController(text: "TestuserF");
-  final TextEditingController _passwordcontroller =
-      TextEditingController(text: "test123");
+  late final TextEditingController _usernamecontroller;
+
+  late final TextEditingController _passwordcontroller;
 
   bool _hidepassword = true;
   bool _usernamebuttonenabled = true;
@@ -114,20 +113,11 @@ class _SignupPageState extends State<SignupPage>
                   width: MediaQuery.of(context).size.width * 0.75,
                   child: TextFormField(
                     controller: _usernamecontroller,
-                    // inputFormatters: [
-                    //   FilteringTextInputFormatter.allow(RegExp(
-                    //       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")),
-                    // ],
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.person),
                       hintText: 'JohnDoe',
                       labelText: 'username',
                     ),
-
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: (value) {
                       if (value == null) {

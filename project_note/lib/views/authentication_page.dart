@@ -16,10 +16,9 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late final TextEditingController _usernamecontroller =
-      TextEditingController(text: "TestuserE");
-  final TextEditingController _passwordcontroller =
-      TextEditingController(text: "test123");
+  late final TextEditingController _usernamecontroller;
+
+  late final TextEditingController _passwordcontroller;
 
   bool _hidepassword = true;
   bool _usernamebuttonenabled = true;

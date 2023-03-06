@@ -3,6 +3,7 @@ import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
 import 'package:project_note/services/forced_logout.dart';
 import 'package:project_note/views/camera_picture.dart';
+import 'package:project_note/widgets/custom_snackbar.dart';
 import 'package:provider/provider.dart';
 
 class BottomBar extends StatefulWidget {
@@ -14,15 +15,6 @@ class BottomBar extends StatefulWidget {
 
 class _BottomBarState extends State<BottomBar> {
   late final TextEditingController _messagecontroller = TextEditingController();
-  void _fireSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: color,
-      content: Text(
-        message.toString(),
-        style: const TextStyle(color: Colors.white),
-      ),
-    ));
-  }
 
   Widget bottomSheet() {
     return SizedBox(
@@ -67,7 +59,8 @@ class _BottomBarState extends State<BottomBar> {
       if (e.toString() == "401") {
         forcedLogOut(context);
       } else if (e != "200") {
-        _fireSnackBar("Error ${e.toString()} occurred", Colors.red);
+        fireSnackBar("Error ${e.toString()} occurred", Colors.red, Colors.white,
+            context);
       }
     }
   }
@@ -95,13 +88,14 @@ class _BottomBarState extends State<BottomBar> {
             ));
           }
         } catch (e) {
-         
           if (e.toString() == "401") {
             forcedLogOut(context);
           } else if (e.toString() == "200") {
-            _fireSnackBar("SuccessFully Uploaded", Colors.green);
+            fireSnackBar(
+                "SuccessFully Uploaded", Colors.green, Colors.white, context);
           } else {
-            _fireSnackBar("Error Code: ${e.toString()} occurred", Colors.red);
+            fireSnackBar("Error Code: ${e.toString()} occurred", Colors.red,
+                Colors.white, context);
           }
         }
       },
