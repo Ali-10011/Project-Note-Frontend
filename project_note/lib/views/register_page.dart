@@ -1,24 +1,27 @@
+import 'package:animations/animations.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/models/credentials_model.dart';
-import 'package:project_note/views/register_page.dart';
+import 'package:project_note/views/authentication_page.dart';
 
 import '../widgets/custom_snackbar.dart';
-import 'package:animations/animations.dart';
 
-class Auth extends StatefulWidget {
-  const Auth({Key? key}) : super(key: key);
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<Auth> createState() => _AuthState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _AuthState extends State<Auth> {
+class _SignupPageState extends State<SignupPage> {
   late final TextEditingController _usernamecontroller =
-      TextEditingController(text: "TestuserE");
+      TextEditingController(text: "TestuserF");
   final TextEditingController _passwordcontroller =
       TextEditingController(text: "test123");
 
@@ -41,13 +44,13 @@ class _AuthState extends State<Auth> {
   void _pushLoadingPage() {
     fireSnackBar(
         "Welcome $sessionUserName !", Colors.green, Colors.white, context);
+
     Navigator.of(context).pushReplacementNamed('/initial');
   }
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          const SignupPage(),
+      pageBuilder: (context, animation, secondaryAnimation) => const Auth(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
@@ -64,6 +67,7 @@ class _AuthState extends State<Auth> {
     );
   }
 
+  void _switchToLoginPage() {}
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -182,34 +186,49 @@ class _AuthState extends State<Auth> {
                                   _isLoading = true;
                                   FocusManager.instance.primaryFocus?.unfocus();
                                 });
-                                loginUser(
+                                registerUser(
                                     _usernamecontroller.value.text.toString(),
                                     _passwordcontroller.value.text.toString());
                               }
                             : null,
-                        child: const Text('Log in')),
+                        child: const Text('Sign up')),
                     const SizedBox(
                       width: 10,
                     ),
+
+                    // ElevatedButton(
+                    //     onPressed: (_usernamebuttonenabled &&
+                    //             _passwordbuttonenabled)
+                    //         ? () {
+                    //             setState(() {
+                    //               _isLoading = true;
+                    //               FocusManager.instance.primaryFocus?.unfocus();
+                    //             });
+                    //             registerUser(
+                    //                 _usernamecontroller.value.text.toString(),
+                    //                 _passwordcontroller.value.text.toString());
+                    //           }
+                    //         : null,
+                    //     child: const Text('Sign up')),
                   ],
           ),
           TextButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(_createRoute());
               },
-              child: const Text('Sign Up Instead ?')),
+              child: const Text('Already have an account ?')),
         ]),
       ),
     );
   }
 
-  Future<void> loginUser(String username, String password) async {
+  Future<void> registerUser(String username, String password) async {
     try {
-      var response = await http.post(Uri.parse('${apiUrl}auth/login'),
+      var response = await http.post(Uri.parse('${apiUrl}auth/register'),
           headers: {"Content-Type": "application/x-www-form-urlencoded"},
           body: {'username': username, 'password': password});
       switch (response.statusCode) {
-        case 200:
+        case 201: //201 means a new user was created
           {
             Map<dynamic, dynamic> jsonDecode = json.decode(response.body);
             UserCredentials credentialsInstance = UserCredentials();
@@ -217,7 +236,6 @@ class _AuthState extends State<Auth> {
                 jsonDecode['token'], jsonDecode['tokenExpiry'], username);
             sessionUserName = username;
             _pushLoadingPage();
-
             break;
           }
         default:
@@ -226,6 +244,7 @@ class _AuthState extends State<Auth> {
           });
       }
     } catch (e) {
+      //Report Error to User
       fireSnackBar(e.toString(), Colors.red, Colors.white, context);
     }
     setState(() {
