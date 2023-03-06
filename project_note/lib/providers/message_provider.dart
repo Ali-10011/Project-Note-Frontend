@@ -236,13 +236,10 @@ class MessageProvider with ChangeNotifier {
 
     messageslist.insert(0, newInstance);
     saveMessages();
-
-    if (connection == ConnectionStatus.wifi) {
-      try {
-        await uploadImage(newInstance);
-      } catch (e) {
-        throw (e.toString());
-      }
+    try {
+      await uploadImage(newInstance);
+    } catch (e) {
+      rethrow;
     }
     return null;
   }
@@ -315,7 +312,7 @@ class MessageProvider with ChangeNotifier {
         throw (e.toString());
       }
     }
-    throw ("200"); 
+    return null;
   }
 
   Future<String?> sendVideo() async {
@@ -419,7 +416,7 @@ class MessageProvider with ChangeNotifier {
           .map<Message>((message) => Message.fromJson(message))
           .toList();
       notifyListeners();
-      
+
       throw ("200");
     } else if (connection == ConnectionStatus.wifi) {
       try {
@@ -460,18 +457,18 @@ class MessageProvider with ChangeNotifier {
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))
               .toList());
-          
+
           isLastPage = true;
         } else {
           messageslist.addAll(json
               .decode(response.body)
               .map<Message>((message) => Message.fromJson(message))
               .toList());
-         
+
           isLastPage = false;
         }
         saveMessages();
-       
+
         throw ("200");
       default:
         throw (response.statusCode.toString());

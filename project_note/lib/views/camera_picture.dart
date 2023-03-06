@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
+
 import 'package:provider/provider.dart';
 import 'package:project_note/views/err_page.dart';
 
@@ -100,24 +101,13 @@ class DisplayPictureScreen extends StatefulWidget {
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
-  void _fireSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: Colors.red,
-      content: Text(
-        message.toString(),
-        style: const TextStyle(color: Colors.white),
-      ),
-    ));
-  }
-
-  Future<void> _doForcedLogoutActivities() async {
-    credentialsInstance.deleteTokenCredentials();
-    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
-    _fireSnackBar("Session Expired !");
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
-    });
+  void _handlePicture() async {
+    try {
+      await Provider.of<MessageProvider>(context, listen: false)
+          .sendCameraImage(widget.imagePath);
+    } catch (e) {
+      //do nothing
+    }
   }
 
   @override
@@ -128,6 +118,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
         floatingActionButton:
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           FloatingActionButton(
+            backgroundColor: Colors.white,
             heroTag: null,
             onPressed: () {
               Navigator.pushReplacement(
@@ -137,25 +128,19 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                         TakePictureScreen(camera: firstCamera),
                   ));
             },
-            child: const Icon(Icons.delete),
+            child: const Icon(Icons.delete, color: Colors.black),
           ),
           FloatingActionButton(
+            backgroundColor: Colors.white,
             heroTag: null,
-            onPressed: () async {
-              try {
-                await Provider.of<MessageProvider>(context, listen: false)
-                    .sendCameraImage(widget.imagePath);
-              } catch (e) {
-                if (e.toString() == "401") {
-                  _doForcedLogoutActivities();
-                } else if (e.toString() == "200") {
-                  Navigator.of(context).pop();
-                } else {
-                  _fireSnackBar("Error Code : ${e.toString()} Occurred");
-                }
-              }
+            onPressed: () {
+              _handlePicture();
+              Navigator.of(context).pop();
             },
-            child: const Icon(Icons.check),
+            child: const Icon(
+              Icons.check,
+              color: Colors.black,
+            ),
           )
         ]));
   }

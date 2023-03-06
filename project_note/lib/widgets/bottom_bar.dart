@@ -95,6 +95,7 @@ class _BottomBarState extends State<BottomBar> {
             ));
           }
         } catch (e) {
+         
           if (e.toString() == "401") {
             forcedLogOut(context);
           } else if (e.toString() == "200") {
