@@ -1,6 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
+import 'package:project_note/services/forced_logout.dart';
+import 'package:project_note/views/authentication_page.dart';
+import 'package:project_note/views/home_loader.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -12,12 +15,28 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   void _switchToPage(final snapShotData) {
     Future.delayed(const Duration(seconds: 2), () {
-      if (snapShotData == false) {
-        Navigator.pushReplacementNamed(context, '/auth');
-      } else {
-        Navigator.pushReplacementNamed(context, '/initial');
-      }
+      Navigator.of(context).pushReplacement(animatedLandingTransition(snapShotData));
     });
+  }
+
+  Route animatedLandingTransition(final isValid) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          (isValid == false) ? const Auth() : const LoadingState(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.easeIn;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
   }
 
   void setConnection() async {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:project_note/globals/globals.dart';
 
 import 'package:project_note/views/err_page.dart';
+import 'package:project_note/views/home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:project_note/providers/message_provider.dart';
 
@@ -14,10 +16,29 @@ class LoadingState extends StatefulWidget {
 }
 
 class _LoadingStateState extends State<LoadingState> {
+  Route animatedHomeTransition() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => const Home(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.easeIn;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
   Future<void> waitForData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       //To Navigate From a Future  Builder
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.of(context).pushReplacement(animatedHomeTransition());
     });
   }
 
@@ -51,7 +72,7 @@ class _LoadingStateState extends State<LoadingState> {
       if (e == "200") {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           //To Navigate From a Future  Builder
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.of(context).pushReplacement(animatedHomeTransition());
         });
       }
     }
@@ -91,13 +112,13 @@ class _LoadingStateState extends State<LoadingState> {
   }
 
   @override
-  
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
 
     return Center(
       child: Scaffold(
+          backgroundColor: Colors.black,
           body: (connection == ConnectionStatus.wifi)
               ? Center(
                   child: FutureBuilder(
@@ -109,7 +130,12 @@ class _LoadingStateState extends State<LoadingState> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              CircularProgressIndicator(),
+                              SpinKitDoubleBounce(
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
                               Text("Syncing your Changes....")
                             ],
                           ),
@@ -121,7 +147,12 @@ class _LoadingStateState extends State<LoadingState> {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            CircularProgressIndicator(),
+                            SpinKitDoubleBounce(
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
                             Text("Uploading Your Messages....")
                           ],
                         );
@@ -133,7 +164,12 @@ class _LoadingStateState extends State<LoadingState> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              CircularProgressIndicator(),
+                              SpinKitDoubleBounce(
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
                               Text("Ooops, something unexpeccted Happened")
                             ],
                           ),
@@ -152,7 +188,12 @@ class _LoadingStateState extends State<LoadingState> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              CircularProgressIndicator(),
+                              SpinKitDoubleBounce(
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
                               Text("Loading your Messages....")
                             ],
                           ),
@@ -164,7 +205,12 @@ class _LoadingStateState extends State<LoadingState> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              CircularProgressIndicator(),
+                              SpinKitDoubleBounce(
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
                               Text("Setting you up.....")
                             ],
                           ),
@@ -177,7 +223,12 @@ class _LoadingStateState extends State<LoadingState> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              CircularProgressIndicator(),
+                              SpinKitDoubleBounce(
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
                               Text("Ooops, something unexpeccted Happened")
                             ],
                           ),
