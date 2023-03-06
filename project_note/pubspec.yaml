@@ -52,8 +52,7 @@ dependencies:
   path_provider:
   path:
   cached_video_player:
-  animations: 
-  another_flushbar:
+ 
 
 dev_dependencies:
   flutter_test:
