@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_note/globals/globals.dart';
@@ -25,7 +24,7 @@ class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
   bool _hidepassword = true;
   bool _usernamebuttonenabled = true;
   bool _passwordbuttonenabled = true;
-  String _warningmessage = '';
+
   bool _isLoading = false;
 
   @override
@@ -142,7 +141,6 @@ class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
                       //Repition of code till I find a better alternative
 
                       setState(() {
-                        _warningmessage = '';
                         if (username.length >= 6 &&
                             !username.contains(' ') &&
                             (username.isNotEmpty)) {
@@ -185,7 +183,6 @@ class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
                       return null;
                     },
                     onChanged: (value) {
-                      _warningmessage = '';
                       setState(() {
                         if (value.length >= 6 &&
                             !value.contains(' ') &&
@@ -267,9 +264,8 @@ class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
             break;
           }
         default:
-          setState(() {
-            _warningmessage = response.body.toString();
-          });
+          fireSnackBar(
+              response.body.toString(), Colors.red, Colors.white, context);
       }
     } catch (e) {
       fireSnackBar(e.toString(), Colors.red, Colors.white, context);

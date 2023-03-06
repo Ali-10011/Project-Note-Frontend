@@ -32,7 +32,6 @@ class _LoadingStateState extends State<LoadingState> {
   }
 
   void loadMessages() async {
-   
     try {
       await Provider.of<MessageProvider>(context, listen: false).loadMessages();
     } catch (e) {
@@ -76,7 +75,6 @@ class _LoadingStateState extends State<LoadingState> {
     try {
       await Provider.of<MessageProvider>(context, listen: false).loadMessages();
     } catch (e) {
-     
       return;
     }
   }
@@ -88,6 +86,7 @@ class _LoadingStateState extends State<LoadingState> {
   @override
   void initState() {
     super.initState();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     _setUserName();
   }
 

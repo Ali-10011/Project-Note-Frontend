@@ -26,7 +26,7 @@ class _SignupPageState extends State<SignupPage>
   bool _hidepassword = true;
   bool _usernamebuttonenabled = true;
   bool _passwordbuttonenabled = true;
-  String _warningmessage = '';
+
   bool _isLoading = false;
 
   @override
@@ -143,7 +143,6 @@ class _SignupPageState extends State<SignupPage>
                       //Repition of code till I find a better alternative
 
                       setState(() {
-                        _warningmessage = '';
                         if (username.length >= 6 &&
                             !username.contains(' ') &&
                             (username.isNotEmpty)) {
@@ -186,7 +185,6 @@ class _SignupPageState extends State<SignupPage>
                       return null;
                     },
                     onChanged: (value) {
-                      _warningmessage = '';
                       setState(() {
                         if (value.length >= 6 &&
                             !value.contains(' ') &&
@@ -261,8 +259,7 @@ class _SignupPageState extends State<SignupPage>
                 jsonDecode['token'], jsonDecode['tokenExpiry'], username);
             sessionUserName = username;
             _pushLoadingPage();
-            fireSnackBar(
-                response.body.toString(), Colors.green, Colors.white, context);
+
             break;
           }
         default:
