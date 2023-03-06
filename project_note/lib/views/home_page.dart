@@ -39,9 +39,7 @@ class _HomeState extends State<Home> {
         await Provider.of<MessageProvider>(context, listen: false)
             .getMessages();
       } catch (e) {
-        setState(() {
-          isFetching = false;
-        });
+        print(e);
         if (e == "401") {
           forcedLogOut(context);
         } else if (e == "200") {
@@ -49,6 +47,9 @@ class _HomeState extends State<Home> {
           fireSnackBar(e.toString(), Colors.red, Colors.white, context);
         }
       }
+      setState(() {
+        isFetching = false;
+      });
     }
   }
 
@@ -60,6 +61,7 @@ class _HomeState extends State<Home> {
         if ((connection == ConnectionStatus.wifi)) {
           if (controller.position.maxScrollExtent == controller.offset &&
               !isFetching) {
+                
             if (!(isLastPage)) {
               loadMore();
             }
