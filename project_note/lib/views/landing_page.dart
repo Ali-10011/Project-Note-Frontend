@@ -30,7 +30,6 @@ class _LandingPageState extends State<LandingPage> {
     } else {
       connection = ConnectionStatus.noConnection;
     }
- 
   }
 
   @override
@@ -41,6 +40,8 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     return FutureBuilder(
       future: credentialsInstance.isTokenValid(),
       builder: (context, dataSnapshot) {
