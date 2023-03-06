@@ -45,7 +45,7 @@ Widget messageTile(Message messageEntry, BuildContext context) {
                     if (e == "401") {
                       fireSnackBar("Session Expired !", Colors.red,
                           Colors.white, context);
-                      doForcedLogoutActivities(context);
+                      forcedLogOut(context);
                     } else {
                       fireSnackBar(
                           "Cannot Perform Action. Response statusCode : $e ",

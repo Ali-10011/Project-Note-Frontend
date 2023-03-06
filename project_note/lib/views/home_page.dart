@@ -13,6 +13,7 @@ import 'package:project_note/widgets/bottom_bar.dart';
 import '../services/forced_logout.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/connection_alert.dart';
+import '../views/logout_page.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -35,7 +36,7 @@ class _HomeState extends State<Home> {
             .getMessages();
       } catch (e) {
         if (e == "401") {
-          doForcedLogoutActivities(context);
+          forcedLogOut(context);
         } else if (e == "200") {
         } else {
           fireSnackBar(e.toString(), Colors.red, Colors.white, context);

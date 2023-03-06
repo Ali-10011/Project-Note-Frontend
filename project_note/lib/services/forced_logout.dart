@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../globals/globals.dart';
-import '../providers/message_provider.dart';
 import '../widgets/custom_snackbar.dart';
+import '../views/logout_page.dart';
 
-Future<void> doForcedLogoutActivities(BuildContext context) async {
-  credentialsInstance.deleteTokenCredentials();
-  Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
+void forcedLogOut(BuildContext context) {
   fireSnackBar("Session Expired !", Colors.red, Colors.white, context);
-  Future.delayed(const Duration(seconds: 1), () {
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
-  });
+  Navigator.of(context).pushReplacement(animatedLogoutTransition());
+}
+
+Route animatedLogoutTransition() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => const Logout(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.easeIn;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }

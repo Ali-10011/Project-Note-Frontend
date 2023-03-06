@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
 import 'package:project_note/providers/message_provider.dart';
+import 'package:project_note/services/forced_logout.dart';
 import 'package:project_note/views/camera_picture.dart';
 import 'package:provider/provider.dart';
 
@@ -21,16 +22,6 @@ class _BottomBarState extends State<BottomBar> {
         style: const TextStyle(color: Colors.white),
       ),
     ));
-  }
-
-  Future<void> _doForcedLogoutActivities() async {
-    credentialsInstance.deleteTokenCredentials();
-    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
-    _fireSnackBar("Session Expired !", Colors.red);
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
-    });
   }
 
   Widget bottomSheet() {
@@ -74,7 +65,7 @@ class _BottomBarState extends State<BottomBar> {
           .sendMessage(text);
     } catch (e) {
       if (e.toString() == "401") {
-        _doForcedLogoutActivities();
+        forcedLogOut(context);
       } else if (e != "200") {
         _fireSnackBar("Error ${e.toString()} occurred", Colors.red);
       }
@@ -105,7 +96,7 @@ class _BottomBarState extends State<BottomBar> {
           }
         } catch (e) {
           if (e.toString() == "401") {
-            _doForcedLogoutActivities();
+            forcedLogOut(context);
           } else if (e.toString() == "200") {
             _fireSnackBar("SuccessFully Uploaded", Colors.green);
           } else {

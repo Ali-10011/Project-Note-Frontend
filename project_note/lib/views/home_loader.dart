@@ -86,12 +86,13 @@ class _LoadingStateState extends State<LoadingState> {
   @override
   void initState() {
     super.initState();
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
     _setUserName();
   }
 
   @override
-  Widget build(BuildContext context) {
+  
+  Widget build(BuildContext context) { 
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
 

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:provider/provider.dart';
-
-import '../providers/message_provider.dart';
+import 'package:project_note/services/forced_logout.dart';
 
 class ProfileHero extends StatefulWidget {
   const ProfileHero({super.key});
@@ -13,18 +11,6 @@ class ProfileHero extends StatefulWidget {
 }
 
 class _ProfileHeroState extends State<ProfileHero> {
-  bool isLoading = false;
-
-  Future<void> _doLogoutActivities() async {
-    credentialsInstance.deleteTokenCredentials();
-    Provider.of<MessageProvider>(context, listen: false).deleteAllMessages();
-    isLastPage = false;
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil('/auth', (Route<dynamic> route) => false);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     timeDilation = 1.0;
@@ -63,22 +49,18 @@ class _ProfileHeroState extends State<ProfileHero> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : ElevatedButton.icon(
-                          style: ButtonStyle(
-                            elevation: MaterialStateProperty.all(20),
-                            backgroundColor:
-                                MaterialStateProperty.all(Colors.red),
-                          ),
-                          onPressed: () async {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            _doLogoutActivities();
-                          },
-                          icon: const Icon(Icons.logout_rounded),
-                          label: const Text('Logout')),
+                  child: ElevatedButton.icon(
+                      style: ButtonStyle(
+                        elevation: MaterialStateProperty.all(20),
+                        backgroundColor: MaterialStateProperty.all(Colors.red),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context)
+                            .pushReplacement(animatedLogoutTransition());
+                      },
+                      icon: const Icon(Icons.logout_rounded),
+                      label: const Text('Logout')),
                 )
               ]),
         ),
