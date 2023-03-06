@@ -14,7 +14,6 @@ import '../services/forced_logout.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/connection_alert.dart';
 
-
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -25,16 +24,24 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Message> _messageslist = [];
   final controller = ScrollController();
+  bool isFetching = false;
 
   Color networkBarColor =
       (connection == ConnectionStatus.wifi) ? Colors.blue : Colors.white;
 
   void loadMore() async {
+    setState(() {
+      isFetching = true;
+    });
+
     if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
       try {
         await Provider.of<MessageProvider>(context, listen: false)
             .getMessages();
       } catch (e) {
+        setState(() {
+          isFetching = false;
+        });
         if (e == "401") {
           forcedLogOut(context);
         } else if (e == "200") {
@@ -49,9 +56,10 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     controller.addListener(() {
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(milliseconds: 1500), () {
         if ((connection == ConnectionStatus.wifi)) {
-          if (controller.position.maxScrollExtent == controller.offset) {
+          if (controller.position.maxScrollExtent == controller.offset &&
+              !isFetching) {
             if (!(isLastPage)) {
               loadMore();
             }
@@ -183,7 +191,6 @@ class _HomeState extends State<Home> {
                             ),
                           );
                         } else {
-                          loadMore();
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 32),
                             child: Center(child: CircularProgressIndicator()),
