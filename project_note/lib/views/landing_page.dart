@@ -1,7 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:project_note/globals/globals.dart';
-import 'package:project_note/services/forced_logout.dart';
 import 'package:project_note/views/authentication_page.dart';
 import 'package:project_note/views/home_loader.dart';
 

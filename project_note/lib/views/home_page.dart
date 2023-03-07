@@ -30,26 +30,21 @@ class _HomeState extends State<Home> {
       (connection == ConnectionStatus.wifi) ? Colors.blue : Colors.white;
 
   void loadMore() async {
-    setState(() {
-      isFetching = true;
-    });
+    isFetching = true;
 
     if ((connection == ConnectionStatus.wifi) && (isLastPage == false)) {
       try {
         await Provider.of<MessageProvider>(context, listen: false)
             .getMessages();
       } catch (e) {
-        print(e);
         if (e == "401") {
           forcedLogOut(context);
-        } else if (e == "200") {
-        } else {
+        } else if (e != "200") {
           fireSnackBar(e.toString(), Colors.red, Colors.white, context);
         }
       }
-      setState(() {
-        isFetching = false;
-      });
+
+      isFetching = false;
     }
   }
 
@@ -61,7 +56,6 @@ class _HomeState extends State<Home> {
         if ((connection == ConnectionStatus.wifi)) {
           if (controller.position.maxScrollExtent == controller.offset &&
               !isFetching) {
-                
             if (!(isLastPage)) {
               loadMore();
             }
@@ -193,6 +187,7 @@ class _HomeState extends State<Home> {
                             ),
                           );
                         } else {
+                          loadMore();
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 32),
                             child: Center(child: CircularProgressIndicator()),
