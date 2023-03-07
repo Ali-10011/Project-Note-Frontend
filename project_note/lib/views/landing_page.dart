@@ -106,7 +106,7 @@ class _LandingPageState extends State<LandingPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
                 CircularProgressIndicator(),
-                Text("Ooops, something unexpeccted Happened")
+                Text("Ooops, something unexpected happened")
               ],
             ),
           );

@@ -170,7 +170,7 @@ class _LoadingStateState extends State<LoadingState> {
                               SizedBox(
                                 height: 30,
                               ),
-                              Text("Ooops, something unexpeccted Happened")
+                              Text("Ooops, something unexpected happened")
                             ],
                           ),
                         );
@@ -229,7 +229,7 @@ class _LoadingStateState extends State<LoadingState> {
                               SizedBox(
                                 height: 30,
                               ),
-                              Text("Ooops, something unexpeccted Happened")
+                              Text("Ooops, something unexpected happened")
                             ],
                           ),
                         );

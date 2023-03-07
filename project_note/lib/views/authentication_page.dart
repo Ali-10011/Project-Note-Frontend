@@ -111,20 +111,13 @@ class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
                   width: MediaQuery.of(context).size.width * 0.75,
                   child: TextFormField(
                     controller: _usernamecontroller,
-                    // inputFormatters: [
-                    //   FilteringTextInputFormatter.allow(RegExp(
-                    //       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")),
-                    // ],
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.person),
                       hintText: 'JohnDoe',
                       labelText: 'username',
                     ),
 
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
+                   
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     validator: (value) {
                       if (value == null) {
