@@ -21,6 +21,22 @@ class _ProfileHeroState extends State<ProfileHero> {
           child: ListView(
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
               children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.all(0.0),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(
+                        Icons.cancel_rounded,
+                        color: Colors.white,
+                        size: 25,
+                      ),
+                    ),
+                  ],
+                ),
                 InkWell(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -39,13 +55,9 @@ class _ProfileHeroState extends State<ProfileHero> {
                         fontWeight: FontWeight.bold, fontSize: 26),
                   )),
                 ),
-                const Divider(thickness: 3.0, height: 30),
-                RichText(
-                  text: const TextSpan(
-                      text:
-                          "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."),
-                  selectionRegistrar: SelectionContainer.maybeOf(context),
-                  selectionColor: const Color(0xAF6694e8),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(40, 0, 40, screenHeight * 0.1),
+                  child: const Divider(thickness: 3.0, height: 30),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),

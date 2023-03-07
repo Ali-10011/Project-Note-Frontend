@@ -24,7 +24,6 @@ class _AuthState extends State<Auth> with SingleTickerProviderStateMixin {
   bool _hidepassword = true;
   bool _usernamebuttonenabled = true;
   bool _passwordbuttonenabled = true;
-
   bool _isLoading = false;
 
   @override

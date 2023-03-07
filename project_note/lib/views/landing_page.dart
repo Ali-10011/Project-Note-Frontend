@@ -14,7 +14,8 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   void _switchToPage(final snapShotData) {
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(animatedLandingTransition(snapShotData));
+      Navigator.of(context)
+          .pushReplacement(animatedLandingTransition(snapShotData));
     });
   }
 
@@ -56,6 +57,34 @@ class _LandingPageState extends State<LandingPage> {
     setConnection();
   }
 
+  Widget createBody() {
+    return Scaffold(
+      body: Stack(children: [
+        ClipRRect(
+          child: Image.asset('assets/landing_page.jpg',
+              fit: BoxFit.cover, height: MediaQuery.of(context).size.height),
+        ),
+        Positioned(
+          top: 100,
+          left: screenWidth * 0.33,
+          child: Center(
+            child: Text(
+              "Note",
+              style: TextStyle(
+                  fontSize: 60,
+                  foreground: Paint()
+                    ..shader = const LinearGradient(
+                      colors: <Color>[Colors.white, Colors.black],
+                    ).createShader(
+                      const Rect.fromLTWH(0.0, 0.0, 300.0, 50.0),
+                    )),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
@@ -64,18 +93,11 @@ class _LandingPageState extends State<LandingPage> {
       future: credentialsInstance.isTokenValid(),
       builder: (context, dataSnapshot) {
         if (dataSnapshot.connectionState == ConnectionState.waiting) {
-          return ClipRRect(
-            child: Image.asset('assets/landing_page.jpg'),
-          );
+          return createBody();
         } else if (dataSnapshot.connectionState == ConnectionState.done) {
           _switchToPage(dataSnapshot.data);
 
-          return ClipRRect(
-            child: Image.asset(
-              'assets/landing_page.jpg',
-              fit: BoxFit.fill,
-            ),
-          );
+          return createBody();
         } else if (dataSnapshot.hasError) {
           return Container();
         } else {
